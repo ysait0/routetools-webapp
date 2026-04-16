@@ -26,7 +26,7 @@
   <header>
     <h1 id="app-title" data-i18n="header.title" title="クリックでリロード">routetools</h1>
     <span id="status" class="status" data-i18n="header.initial_status">ルートファイルを読み込んでください</span>
-    <a class="version-badge" href="https://github.com/ysait0/routetools-webapp" target="_blank" rel="noopener">v1.5.0</a>
+    <a class="version-badge" href="https://github.com/ysait0/routetools-webapp" target="_blank" rel="noopener">v1.6.0</a>
     <div class="lang-select">
       <select id="language-selector" aria-label="Language">
         <option value="ja">日本語</option>
@@ -68,6 +68,10 @@
           </label>
         </div>
         <div id="route-info"></div>
+        <div class="history-actions">
+          <button class="btn btn-secondary" id="btn-undo" data-i18n="button.undo" disabled>元に戻す</button>
+          <button class="btn btn-secondary" id="btn-redo" data-i18n="button.redo" disabled>やり直し</button>
+        </div>
         <button class="btn btn-secondary" id="btn-reset" data-i18n="button.reset">リセット</button>
       </section>
 
@@ -139,7 +143,22 @@
 
     <div class="sidebar-resizer" id="sidebar-resizer" title="ドラッグで幅変更"></div>
 
-    <div id="map"></div>
+    <div class="map-area">
+      <div id="map"></div>
+      <div id="elevation-profile" class="elevation-profile">
+        <div class="elevation-header">
+          <span class="elevation-title" data-i18n="section.elevation_profile">標高プロファイル</span>
+          <span class="elevation-stats" id="elevation-stats"></span>
+          <button class="btn-elevation-toggle" id="btn-elevation-toggle" data-i18n-title="tooltip.elevation_toggle" aria-label="Toggle elevation profile">&#9660;</button>
+        </div>
+        <div class="elevation-body">
+          <div class="elevation-canvas-wrap">
+            <canvas id="elevation-canvas"></canvas>
+            <canvas id="elevation-overlay" class="elevation-overlay"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -150,6 +169,7 @@
   <script src="js/parsers.js"></script>
   <script src="js/builders.js"></script>
   <script src="js/map.js"></script>
+  <script src="js/elevation.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

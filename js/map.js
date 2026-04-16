@@ -3,10 +3,14 @@
 let map = null;
 let routeLayer = null;
 let poiLayer = null;
+let hoverHighlightLayer = null; // クロスハイライト用の単一マーカーを置くレイヤー
+let hoverHighlightMarker = null;
 let onRouteClickCallback = null;
 let onMarkerClickCallback = null;
 let onMarkerHoverCallback = null; // (index, isHovering) を受け取る外部通知用
+let onRouteHoverCallback = null; // ルート上のmousemove通知 (index|null)
 let poiMarkers = []; // POI一覧のindexと対応する{marker, poi}配列
+let trackpointsCache = []; // ルート上hover時に最近傍を高速計算するため保持
 
 const POI_COLOR_DEFAULT = '#3388ff';
 const POI_COLOR_HIGHLIGHT = '#ef4444';
@@ -94,6 +98,12 @@ function initMap(elementId) {
 
   routeLayer = L.layerGroup().addTo(map);
   poiLayer = L.layerGroup().addTo(map);
+  hoverHighlightLayer = L.layerGroup().addTo(map);
+
+  // レイアウト確定後にサイズを再計算（標高プロファイル分のスペースを反映してタイルを読み込み直す）
+  requestAnimationFrame(() => {
+    if (map) map.invalidateSize();
+  });
 }
 
 function getMap() {
@@ -112,6 +122,10 @@ function setMarkerHoverHandler(callback) {
   onMarkerHoverCallback = callback;
 }
 
+function setRouteHoverHandler(callback) {
+  onRouteHoverCallback = callback;
+}
+
 function clearMap() {
   if (routeLayer) routeLayer.clearLayers();
   if (poiLayer) poiLayer.clearLayers();
@@ -119,6 +133,8 @@ function clearMap() {
 
 function displayRoute(trackpoints) {
   if (routeLayer) routeLayer.clearLayers();
+  clearRouteHighlight();
+  trackpointsCache = trackpoints || [];
   if (!trackpoints || trackpoints.length === 0) return;
 
   const latlngs = trackpoints.map(tp => [tp.latitude, tp.longitude]);
@@ -133,7 +149,55 @@ function displayRoute(trackpoints) {
       onRouteClickCallback(e.latlng);
     }
   });
+  clickable.on('mousemove', (e) => {
+    if (!onRouteHoverCallback) return;
+    const idx = findNearestTrackpointIndex(e.latlng);
+    if (idx !== -1) onRouteHoverCallback(idx);
+  });
+  clickable.on('mouseout', () => {
+    if (onRouteHoverCallback) onRouteHoverCallback(null);
+  });
   map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
+}
+
+// 緯度経度に最も近いトラックポイントのindexを返す（二乗距離で十分）
+function findNearestTrackpointIndex(latlng) {
+  if (!trackpointsCache || trackpointsCache.length === 0) return -1;
+  let minD = Infinity;
+  let minI = 0;
+  for (let i = 0; i < trackpointsCache.length; i++) {
+    const tp = trackpointsCache[i];
+    const dy = tp.latitude - latlng.lat;
+    const dx = tp.longitude - latlng.lng;
+    const d = dx * dx + dy * dy;
+    if (d < minD) { minD = d; minI = i; }
+  }
+  return minI;
+}
+
+// 指定座標にクロスハイライト用のマーカーを表示（既存は移動）
+function setRouteHighlight(latlng) {
+  if (!map || !hoverHighlightLayer) return;
+  if (!hoverHighlightMarker) {
+    hoverHighlightMarker = L.circleMarker(latlng, {
+      radius: 6,
+      color: '#ef4444',
+      weight: 2,
+      fillColor: '#ef4444',
+      fillOpacity: 0.7,
+      interactive: false,
+    });
+    hoverHighlightLayer.addLayer(hoverHighlightMarker);
+  } else {
+    hoverHighlightMarker.setLatLng(latlng);
+  }
+}
+
+function clearRouteHighlight() {
+  if (hoverHighlightMarker && hoverHighlightLayer) {
+    hoverHighlightLayer.removeLayer(hoverHighlightMarker);
+    hoverHighlightMarker = null;
+  }
 }
 
 function displayPOIs(pois) {

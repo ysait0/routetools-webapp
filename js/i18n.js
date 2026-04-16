@@ -9,6 +9,7 @@ const translations = {
     'section.input_files': '入力ファイル',
     'section.output_options': '出力オプション',
     'section.poi_list': 'POI一覧',
+    'section.elevation_profile': '標高プロファイル',
 
     // イントロ（サイドバー上部の説明）
     'intro.features': 'ルートファイル（GPX / KML / KMZ / TCX / FIT）の<strong>形式変換</strong>と<strong>POIの追加・編集</strong>ができます。',
@@ -33,6 +34,8 @@ const translations = {
 
     // ボタン
     'button.reset': 'リセット',
+    'button.undo': '元に戻す',
+    'button.redo': 'やり直し',
     'button.download': 'ダウンロード',
     'button.remove_poi': 'POI全削除',
     'button.add_poi': '追加',
@@ -73,12 +76,19 @@ const translations = {
     'tooltip.poi_add': '既存のルートにPOIを追加する場合に指定します。ファイル内のPOIのみが抽出され、現在のルートに追加されます。対応形式: GPX / KML / KMZ / TCX / FIT / CSV',
     'tooltip.tolerance': 'POIからルート上の最近傍点までの距離がこの値以下の場合のみ、POIを出力に含めます。この値を超えたPOIは「スキップ」として出力から除外されます（ダウンロード後、POI一覧では追加=緑、スキップ=赤で表示）。',
     'tooltip.force': 'ONの場合、POIをルート上の最近傍点に強制配置します。OFFの場合はPOIの元の座標を保持します。TCX出力時は常にON扱いです。',
-    'tooltip.reverse': 'ONの場合、出力ファイルのルート方向を反転します（スタートとゴールが入れ替わります）。画面上の表示や読み込み済みデータは変更されず、ダウンロード時にのみ反映されます。',
+    'tooltip.reverse': 'ONの場合、ルート方向を即座に反転し、地図・POI一覧・標高プロファイルにも反映します。スタートとゴールの名称も端点に合わせて入れ替わります。',
+    'tooltip.elevation_toggle': '標高プロファイルの表示/非表示を切り替え',
+
+    // 標高プロファイル
+    'elevation.stats': '最小 {min}m / 最大 {max}m / 獲得 +{gain}m / 損失 -{loss}m',
+    'elevation.no_data': '標高データがありません',
 
     // ステータスメッセージ
     'status.loading': 'ファイルを読み込み中...',
     'status.poi_loading': 'POIファイルを読み込み中...',
     'status.reset': 'リセットしました',
+    'status.undo': '元に戻しました',
+    'status.redo': 'やり直しました',
     'status.all_poi_removed': 'POIを全て削除しました',
     'status.error_no_trackpoints': 'エラー: トラックポイントが見つかりません',
     'status.error_no_pois': 'エラー: POIが見つかりません',
@@ -109,6 +119,7 @@ const translations = {
     'section.input_files': 'Input Files',
     'section.output_options': 'Output Options',
     'section.poi_list': 'POI List',
+    'section.elevation_profile': 'Elevation Profile',
 
     // Intro (top of sidebar)
     'intro.features': '<strong>Convert</strong> route file formats (GPX / KML / KMZ / TCX / FIT) and <strong>add / edit POIs</strong>.',
@@ -133,6 +144,8 @@ const translations = {
 
     // Buttons
     'button.reset': 'Reset',
+    'button.undo': 'Undo',
+    'button.redo': 'Redo',
     'button.download': 'Download',
     'button.remove_poi': 'Remove All POIs',
     'button.add_poi': 'Add',
@@ -173,12 +186,19 @@ const translations = {
     'tooltip.poi_add': 'Specify this when adding POIs to an existing route. Only POIs are extracted from the file and added to the current route. Supported formats: GPX / KML / KMZ / TCX / FIT / CSV',
     'tooltip.tolerance': 'POIs are included in the output only if the distance to the nearest point on the route is less than or equal to this value. POIs beyond this distance are "skipped" (excluded). After download, added POIs are shown in green and skipped POIs in red in the list.',
     'tooltip.force': 'When ON, POIs are snapped to the nearest point on the route. When OFF, the original POI coordinates are preserved. TCX output always treats this as ON.',
-    'tooltip.reverse': 'When ON, the output file has its route direction reversed (start and goal are swapped). The on-screen display and loaded data are not affected — this only applies at download time.',
+    'tooltip.reverse': 'When ON, the route direction is reversed immediately and reflected in the map, POI list, and elevation profile. Start and goal names are also swapped to match the endpoints.',
+    'tooltip.elevation_toggle': 'Show / hide the elevation profile',
+
+    // Elevation profile
+    'elevation.stats': 'Min {min}m / Max {max}m / Gain +{gain}m / Loss -{loss}m',
+    'elevation.no_data': 'No elevation data',
 
     // Status messages
     'status.loading': 'Loading file...',
     'status.poi_loading': 'Loading POI file...',
     'status.reset': 'Reset complete',
+    'status.undo': 'Undone',
+    'status.redo': 'Redone',
     'status.all_poi_removed': 'All POIs removed',
     'status.error_no_trackpoints': 'Error: No trackpoints found',
     'status.error_no_pois': 'Error: No POIs found',
@@ -264,6 +284,12 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n-tooltip]').forEach(el => {
     const key = el.dataset.i18nTooltip;
     el.dataset.tooltip = t(key);
+  });
+
+  // data-i18n-title属性を持つ要素のtitle属性を更新（ブラウザ標準tooltip用）
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.dataset.i18nTitle;
+    el.title = t(key);
   });
 
   // html langを更新

@@ -1,6 +1,7 @@
 // メインアプリケーション
 
 const POI_TYPES = ['Generic', 'Flag', 'Straight', 'Left', 'Right'];
+const HISTORY_LIMIT = 100;
 
 let appState = {
   metadata: null,
@@ -8,6 +9,15 @@ let appState = {
   pois: [],
   lastPOIResults: null,  // 最後のビルド結果（言語切替時の再描画用）
   originalFilename: null, // アップロード時の元ファイル名（拡張子なし）
+  isReversed: false, // 現在のtrackpointsが反転済みか（チェックボックスと同期）
+  routeFilename: null,
+  poiFilename: null,
+};
+
+let historyState = {
+  undoStack: [],
+  redoStack: [],
+  isApplying: false,
 };
 
 function buildPoiTypeOptions(currentType) {
@@ -30,7 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setRouteClickHandler(handleRouteClick);
   setMarkerClickHandler(handlePOIMarkerClick);
   setMarkerHoverHandler(handlePOIMarkerHover);
+  setRouteHoverHandler(handleRouteHover);
+  setProfileHoverHandler(handleProfileHover);
   setupSidebarResizer();
+  setupElevationProfile();
 
   // タイトルクリックでリロード
   document.getElementById('app-title').addEventListener('click', () => {
@@ -41,7 +54,117 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('language-selector').addEventListener('change', (e) => {
     setLanguage(e.target.value);
   });
+
+  updateHistoryButtons();
 });
+
+function cloneHistoryValue(value) {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(value);
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
+function captureSnapshot() {
+  return cloneHistoryValue({
+    metadata: appState.metadata,
+    trackpoints: appState.trackpoints,
+    pois: appState.pois,
+    lastPOIResults: appState.lastPOIResults,
+    originalFilename: appState.originalFilename,
+    isReversed: appState.isReversed,
+    routeFilename: appState.routeFilename,
+    poiFilename: appState.poiFilename,
+  });
+}
+
+function restoreSnapshot(snapshot) {
+  appState = cloneHistoryValue(snapshot);
+  document.getElementById('route-file').value = '';
+  document.getElementById('poi-file').value = '';
+  document.getElementById('reverse').checked = !!appState.isReversed;
+  renderFilename('route', appState.routeFilename);
+  renderFilename('poi', appState.poiFilename);
+  updateDisplay();
+}
+
+function saveHistoryPoint() {
+  if (historyState.isApplying) return;
+  historyState.undoStack.push(captureSnapshot());
+  if (historyState.undoStack.length > HISTORY_LIMIT) {
+    historyState.undoStack.shift();
+  }
+  historyState.redoStack = [];
+  updateHistoryButtons();
+}
+
+function updateHistoryButtons() {
+  const undoBtn = document.getElementById('btn-undo');
+  const redoBtn = document.getElementById('btn-redo');
+  if (undoBtn) undoBtn.disabled = historyState.undoStack.length === 0;
+  if (redoBtn) redoBtn.disabled = historyState.redoStack.length === 0;
+}
+
+function undoHistory() {
+  if (historyState.undoStack.length === 0) return;
+  historyState.redoStack.push(captureSnapshot());
+  const snapshot = historyState.undoStack.pop();
+  historyState.isApplying = true;
+  try {
+    restoreSnapshot(snapshot);
+  } finally {
+    historyState.isApplying = false;
+  }
+  updateHistoryButtons();
+  showStatus(t('status.undo'));
+}
+
+function redoHistory() {
+  if (historyState.redoStack.length === 0) return;
+  historyState.undoStack.push(captureSnapshot());
+  const snapshot = historyState.redoStack.pop();
+  historyState.isApplying = true;
+  try {
+    restoreSnapshot(snapshot);
+  } finally {
+    historyState.isApplying = false;
+  }
+  updateHistoryButtons();
+  showStatus(t('status.redo'));
+}
+
+function hasRestorableState() {
+  return !!(
+    (appState.trackpoints && appState.trackpoints.length > 0) ||
+    (appState.pois && appState.pois.length > 0) ||
+    appState.metadata ||
+    appState.originalFilename ||
+    appState.routeFilename ||
+    appState.poiFilename
+  );
+}
+
+function isTextEditingElement(target) {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable) return true;
+  const tag = target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  return !!target.closest('[contenteditable="true"]');
+}
+
+function handleGlobalKeydown(e) {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+  if (isTextEditingElement(e.target)) return;
+
+  const key = e.key.toLowerCase();
+  if (key === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    undoHistory();
+  } else if ((key === 'z' && e.shiftKey) || key === 'y') {
+    e.preventDefault();
+    redoHistory();
+  }
+}
 
 function handleRouteClick(latlng) {
   const content = `
@@ -71,6 +194,7 @@ function handleRouteClick(latlng) {
       const name = (document.getElementById('new-poi-name').value || '').trim();
       const notes = (document.getElementById('new-poi-notes').value || '').trim();
       const type = document.getElementById('new-poi-type').value || 'Generic';
+      saveHistoryPoint();
       appState.pois.push({
         latitude: latlng.lat,
         longitude: latlng.lng,
@@ -100,6 +224,30 @@ function handleRouteClick(latlng) {
       });
     });
   }, 0);
+}
+
+// ルート上のマウス移動 → プロファイルと地図に対応位置のマーカーを出す
+function handleRouteHover(index) {
+  if (index == null) {
+    clearRouteHighlight();
+    drawElevationOverlay(null);
+    return;
+  }
+  const tp = appState.trackpoints[index];
+  if (!tp) return;
+  setRouteHighlight([tp.latitude, tp.longitude]);
+  drawElevationOverlay(index);
+}
+
+// プロファイル上のマウス移動 → 地図にマーカーを出す（プロファイル側はelevation.jsが描く）
+function handleProfileHover(index) {
+  if (index == null) {
+    clearRouteHighlight();
+    return;
+  }
+  const tp = appState.trackpoints[index];
+  if (!tp) return;
+  setRouteHighlight([tp.latitude, tp.longitude]);
 }
 
 function handlePOIMarkerHover(index, hovering) {
@@ -149,6 +297,14 @@ function handlePOIMarkerClick(index) {
       const notes = (document.getElementById('edit-poi-notes').value || '').trim();
       const type = document.getElementById('edit-poi-type').value || 'Generic';
       if (!appState.pois[index]) return;
+      const currentPoi = appState.pois[index];
+      const nextName = name || null;
+      const nextNotes = notes || null;
+      if (currentPoi.name === nextName && currentPoi.notes === nextNotes && currentPoi.type === type) {
+        getMap().closePopup(popup);
+        return;
+      }
+      saveHistoryPoint();
       appState.pois[index].name = name || null;
       appState.pois[index].notes = notes || null;
       appState.pois[index].type = type;
@@ -289,6 +445,8 @@ function setupEventListeners() {
 
   // POI削除ボタン
   document.getElementById('btn-remove-poi').addEventListener('click', () => {
+    if (appState.pois.length === 0) return;
+    saveHistoryPoint();
     appState.pois = [];
     appState.lastPOIResults = null;
     updateDisplay();
@@ -306,14 +464,23 @@ function setupEventListeners() {
   // リセットボタン
   document.getElementById('btn-reset').addEventListener('click', handleReset);
 
+  // Undo / Redo
+  document.getElementById('btn-undo').addEventListener('click', undoHistory);
+  document.getElementById('btn-redo').addEventListener('click', redoHistory);
+
   // ダウンロードボタン
   document.getElementById('btn-download').addEventListener('click', handleDownload);
+
+  // 逆走チェックボックス
+  document.getElementById('reverse').addEventListener('change', handleReverseToggle);
 
   // ルートファイル用ドロップゾーン
   setupMiniDropZone('route-drop-zone', loadRouteFile);
 
   // POIファイル用ドロップゾーン
   setupMiniDropZone('poi-drop-zone', loadPOIFile);
+
+  document.addEventListener('keydown', handleGlobalKeydown);
 }
 
 function setupMiniDropZone(zoneId, loader) {
@@ -348,12 +515,16 @@ async function loadRouteFile(file) {
       showStatus(t('status.error_no_trackpoints'), true);
       return;
     }
+    saveHistoryPoint();
     appState.metadata = result.metadata;
     appState.trackpoints = result.trackpoints;
     appState.pois = result.pois || [];
     appState.lastPOIResults = null;
     // ダウンロード時のデフォルト名用に、拡張子を除いたファイル名を保持
     appState.originalFilename = file.name.replace(/\.[^./\\]+$/, '');
+    // 新規読込は順方向で開始するため、逆走チェックをリセット
+    appState.isReversed = false;
+    document.getElementById('reverse').checked = false;
     setFilename('route', file.name);
     updateDisplay();
     showStatus(t('status.loaded', {
@@ -380,6 +551,7 @@ async function loadPOIFile(file) {
       showStatus(t('status.error_no_pois'), true);
       return;
     }
+    saveHistoryPoint();
     appState.pois = appState.pois.concat(result.pois);
     appState.lastPOIResults = null;
     setFilename('poi', file.name);
@@ -393,7 +565,7 @@ async function loadPOIFile(file) {
   }
 }
 
-function setFilename(type, name) {
+function renderFilename(type, name) {
   const zone = document.getElementById(`${type}-drop-zone`);
   const label = document.getElementById(`${type}-filename`);
   if (name) {
@@ -405,6 +577,15 @@ function setFilename(type, name) {
   }
 }
 
+function setFilename(type, name) {
+  if (type === 'route') {
+    appState.routeFilename = name || null;
+  } else if (type === 'poi') {
+    appState.poiFilename = name || null;
+  }
+  renderFilename(type, name);
+}
+
 function handleDownload() {
   if (!appState.trackpoints || appState.trackpoints.length === 0) {
     showStatus(t('status.error_no_route'), true);
@@ -414,50 +595,15 @@ function handleDownload() {
   const outType = document.getElementById('out-type').value;
   const tolerance = parseFloat(document.getElementById('tolerance').value);
   const force = document.getElementById('force').checked;
-  const reverse = document.getElementById('reverse').checked;
-
-  // 逆走オプションON時は出力用のトラックポイントを反転
-  // （distance は累積値なので、反転後に再計算するためクリアする）
-  const trackpointsForOutput = reverse
-    ? appState.trackpoints.slice().reverse().map(tp => ({ ...tp, distance: null }))
-    : appState.trackpoints;
-
-  // 逆走時はスタート/ゴール POI の名前を入れ替える（出力用のコピーに対してのみ）
-  // - 元の trackpoints 先頭座標にある POI で、名前がスタート（全言語）→ ゴール名に
-  // - 元の trackpoints 末尾座標にある POI で、名前がゴール（全言語）→ スタート名に
-  let poisForOutput = appState.pois;
-  if (reverse && appState.trackpoints.length >= 2) {
-    const first = appState.trackpoints[0];
-    const last = appState.trackpoints[appState.trackpoints.length - 1];
-    const startKey = coordKey(first.latitude, first.longitude);
-    const goalKey = coordKey(last.latitude, last.longitude);
-    const startNames = new Set(
-      Object.values(translations).map(dict => dict['poi.start_name']).filter(Boolean)
-    );
-    const goalNames = new Set(
-      Object.values(translations).map(dict => dict['poi.goal_name']).filter(Boolean)
-    );
-    const newStartName = t('poi.start_name');
-    const newGoalName = t('poi.goal_name');
-    poisForOutput = appState.pois.map(poi => {
-      const key = coordKey(poi.latitude, poi.longitude);
-      if (key === startKey && startNames.has(poi.name)) {
-        return { ...poi, name: newGoalName };
-      }
-      if (key === goalKey && goalNames.has(poi.name)) {
-        return { ...poi, name: newStartName };
-      }
-      return poi;
-    });
-  }
+  // 逆走オプションは表示時点で appState 自体を反転しているため、ここでは特別な処理は不要
 
   const options = { tolerance, force };
   let result;
 
   if (outType === 'GPX') {
-    result = buildGPX(appState.metadata, trackpointsForOutput, poisForOutput, options);
+    result = buildGPX(appState.metadata, appState.trackpoints, appState.pois, options);
   } else {
-    result = buildTCX(appState.metadata, trackpointsForOutput, poisForOutput, options);
+    result = buildTCX(appState.metadata, appState.trackpoints, appState.pois, options);
   }
 
   // 各POIに処理結果を付与（表示用、データ本体は変更しない）
@@ -484,13 +630,20 @@ function handleDownload() {
 }
 
 function handleReset() {
+  if (hasRestorableState()) {
+    saveHistoryPoint();
+  }
   appState.metadata = null;
   appState.trackpoints = [];
   appState.pois = [];
   appState.lastPOIResults = null;
   appState.originalFilename = null;
+  appState.isReversed = false;
+  appState.routeFilename = null;
+  appState.poiFilename = null;
   document.getElementById('route-file').value = '';
   document.getElementById('poi-file').value = '';
+  document.getElementById('reverse').checked = false;
   setFilename('route', '');
   setFilename('poi', '');
   updateDisplay();
@@ -499,6 +652,7 @@ function handleReset() {
 
 function removePOI(index) {
   const removed = appState.pois[index];
+  saveHistoryPoint();
   appState.pois.splice(index, 1);
   appState.lastPOIResults = null;
   updateDisplay();
@@ -510,6 +664,7 @@ function addEndpointPOI(endpoint) {
     showStatus(t('status.error_no_route'), true);
     return;
   }
+  saveHistoryPoint();
   const tp = endpoint === 'start'
     ? appState.trackpoints[0]
     : appState.trackpoints[appState.trackpoints.length - 1];
@@ -521,6 +676,7 @@ function addEndpointPOI(endpoint) {
     notes: null,
     type: 'Generic',
     symbol: null,
+    endpointRole: endpoint,
   });
   appState.lastPOIResults = null;
   updateDisplay();
@@ -530,6 +686,111 @@ function addEndpointPOI(endpoint) {
 // 緯度経度を一意キーに（小数7桁で十分な精度）
 function coordKey(lat, lon) {
   return `${lat.toFixed(7)},${lon.toFixed(7)}`;
+}
+
+function getStartGoalNameSets() {
+  return {
+    startNames: new Set(
+      Object.values(translations).map(dict => dict['poi.start_name']).filter(Boolean)
+    ),
+    goalNames: new Set(
+      Object.values(translations).map(dict => dict['poi.goal_name']).filter(Boolean)
+    ),
+  };
+}
+
+/**
+ * 逆走チェックボックスのトグル処理。
+ * trackpointsを物理的に反転し、端点にあるスタート/ゴールPOI名や
+ * 右左折POIの向きも反転後の進行方向に合わせて入れ替える。
+ * 画面表示（地図・POI一覧・標高プロファイル）に即反映する。
+ * 再チェック時は同じ処理を行うことで元の状態に戻る（対称な反転操作）。
+ */
+function handleReverseToggle() {
+  const checkbox = document.getElementById('reverse');
+  const nowReversed = checkbox.checked;
+  if (appState.isReversed === nowReversed) return;
+  if (!appState.trackpoints || appState.trackpoints.length < 2) {
+    appState.isReversed = nowReversed;
+    return;
+  }
+  saveHistoryPoint();
+  // 累積distanceは順序に依存するのでクリア（ビルダー側が再計算する）
+  appState.trackpoints = appState.trackpoints
+    .slice()
+    .reverse()
+    .map(tp => ({ ...tp, distance: null }));
+  swapStartGoalPOINames();
+  swapTurnPOIs();
+  appState.isReversed = nowReversed;
+  appState.lastPOIResults = null;
+  updateDisplay();
+}
+
+/**
+ * 反転後の端点（新しい先頭/末尾座標）にあるPOIで、名前が元の役割と食い違うものを入れ替え。
+ * 反転後:
+ *  - 新しい先頭座標 = 元の末尾座標。そこにあり「ゴール」名のPOI → 「スタート」に
+ *  - 新しい末尾座標 = 元の先頭座標。そこにあり「スタート」名のPOI → 「ゴール」に
+ * 全言語の名前を認識対象にすることで、言語切替を挟んでも正しく動く。
+ */
+function swapStartGoalPOINames() {
+  if (appState.trackpoints.length < 2) return;
+  const first = appState.trackpoints[0];
+  const last = appState.trackpoints[appState.trackpoints.length - 1];
+  const firstKey = coordKey(first.latitude, first.longitude);
+  const lastKey = coordKey(last.latitude, last.longitude);
+  const { startNames, goalNames } = getStartGoalNameSets();
+  const newStartName = t('poi.start_name');
+  const newGoalName = t('poi.goal_name');
+  for (const poi of appState.pois) {
+    if (poi.endpointRole === 'start') {
+      poi.endpointRole = 'goal';
+      poi.name = newGoalName;
+      continue;
+    }
+    if (poi.endpointRole === 'goal') {
+      poi.endpointRole = 'start';
+      poi.name = newStartName;
+      continue;
+    }
+    const key = coordKey(poi.latitude, poi.longitude);
+    if (key === firstKey && goalNames.has(poi.name)) {
+      poi.name = newStartName;
+    } else if (key === lastKey && startNames.has(poi.name)) {
+      poi.name = newGoalName;
+    }
+  }
+}
+
+/**
+ * 逆走時は右左折の意味が反転するため、POIのtypeを Left/Right で入れ替える。
+ * 名前については、自動追加POIは現在言語の標準名に更新し、
+ * 手動POIでも名前が既知の「左折/右折」「Left/Right」に一致する場合のみ入れ替える。
+ */
+function swapTurnPOIs() {
+  const leftNames = new Set(
+    Object.values(translations).map(dict => dict['poi.turn_left']).filter(Boolean)
+  );
+  const rightNames = new Set(
+    Object.values(translations).map(dict => dict['poi.turn_right']).filter(Boolean)
+  );
+  const leftLabel = t('poi.turn_left');
+  const rightLabel = t('poi.turn_right');
+
+  for (const poi of appState.pois) {
+    if (poi.type === 'Left') {
+      poi.type = 'Right';
+      if (poi.autoGenerated || leftNames.has(poi.name)) {
+        poi.name = rightLabel;
+      }
+    } else if (poi.type === 'Right') {
+      poi.type = 'Left';
+      if (poi.autoGenerated || rightNames.has(poi.name)) {
+        poi.name = leftLabel;
+      }
+    }
+  }
 }
 
 function handleAutoTurn() {
@@ -562,6 +823,7 @@ function handleAutoTurn() {
     return;
   }
 
+  saveHistoryPoint();
   for (const turn of missing) {
     const name = turn.direction === 'Left' ? t('poi.turn_left') : t('poi.turn_right');
     appState.pois.push({
@@ -581,22 +843,78 @@ function handleAutoTurn() {
 
 function handleRemoveAutoPOIs() {
   const before = appState.pois.length;
-  appState.pois = appState.pois.filter(p => !p.autoGenerated);
-  const removed = before - appState.pois.length;
+  const nextPois = appState.pois.filter(p => !p.autoGenerated);
+  const removed = before - nextPois.length;
   if (removed === 0) {
     showStatus(t('status.no_auto_pois'));
     return;
   }
+  saveHistoryPoint();
+  appState.pois = nextPois;
   appState.lastPOIResults = null;
   updateDisplay();
   showStatus(t('status.auto_removed', { count: removed }));
 }
 
+/**
+ * POIを現在のルート進行順に並べ替える。
+ * 各POIから最近傍のトラックポイントを求め、その位置順でソートする。
+ */
+function sortPOIsByRouteOrder() {
+  if (!appState.trackpoints || appState.trackpoints.length === 0 || appState.pois.length <= 1) {
+    return;
+  }
+
+  const first = appState.trackpoints[0];
+  const last = appState.trackpoints[appState.trackpoints.length - 1];
+  const firstKey = coordKey(first.latitude, first.longitude);
+  const lastKey = coordKey(last.latitude, last.longitude);
+  const { startNames, goalNames } = getStartGoalNameSets();
+
+  appState.pois = appState.pois
+    .map((poi, originalIndex) => {
+      const nearest = findNearestTrackpoint(poi, appState.trackpoints);
+      const key = coordKey(poi.latitude, poi.longitude);
+      let endpointSortKey = 0;
+
+      if (poi.endpointRole === 'start') {
+        endpointSortKey = -1;
+      } else if (poi.endpointRole === 'goal') {
+        endpointSortKey = 1;
+      } else if (key === firstKey && key === lastKey) {
+        if (startNames.has(poi.name)) endpointSortKey = -1;
+        else if (goalNames.has(poi.name)) endpointSortKey = 1;
+      } else if (key === firstKey && startNames.has(poi.name)) {
+        endpointSortKey = -1;
+      } else if (key === lastKey && goalNames.has(poi.name)) {
+        endpointSortKey = 1;
+      }
+
+      return {
+        poi,
+        originalIndex,
+        routeIndex: nearest.index,
+        routeDistance: nearest.distance,
+        endpointSortKey,
+      };
+    })
+    .sort((a, b) => {
+      if (a.endpointSortKey !== b.endpointSortKey) return a.endpointSortKey - b.endpointSortKey;
+      if (a.routeIndex !== b.routeIndex) return a.routeIndex - b.routeIndex;
+      if (a.routeDistance !== b.routeDistance) return a.routeDistance - b.routeDistance;
+      return a.originalIndex - b.originalIndex;
+    })
+    .map(entry => entry.poi);
+}
+
 function updateDisplay() {
+  setElevationProfileVisible(appState.trackpoints && appState.trackpoints.length > 0);
+  sortPOIsByRouteOrder();
   displayRoute(appState.trackpoints);
   displayPOIs(appState.pois);
   updatePOIList();
   updateRouteInfo();
+  drawElevationProfile(appState.trackpoints);
 }
 
 function updateRouteInfo() {
@@ -648,7 +966,12 @@ function updatePOIList() {
     sel.addEventListener('change', (e) => {
       const idx = parseInt(e.currentTarget.dataset.index, 10);
       if (!appState.pois[idx]) return;
-      appState.pois[idx].type = e.currentTarget.value;
+      const nextType = e.currentTarget.value;
+      if (appState.pois[idx].type === nextType) return;
+      saveHistoryPoint();
+      appState.pois[idx].type = nextType;
+      appState.lastPOIResults = null;
+      updateDisplay();
     });
   });
 
@@ -684,7 +1007,11 @@ function handleCellEdit(e) {
   const field = cell.dataset.field;
   if (!appState.pois[idx]) return;
   const newValue = cell.textContent.trim() || null;
+  if (appState.pois[idx][field] === newValue) return;
+  saveHistoryPoint();
   appState.pois[idx][field] = newValue;
+  appState.lastPOIResults = null;
+  updateDisplay();
 }
 
 function escapeHtml(str) {
