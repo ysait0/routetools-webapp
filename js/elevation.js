@@ -181,7 +181,8 @@ function drawElevationProfile(trackpoints) {
   if (!setup) return;
   const { ctx, w, h } = setup;
 
-  const padLeft = 42, padRight = 10, padTop = 8, padBottom = 18;
+  // padTop はホバー時のラベル帯（チャート上）を確保するため広めに取る
+  const padLeft = 42, padRight = 10, padTop = 22, padBottom = 18;
   const chartW = w - padLeft - padRight;
   const chartH = h - padTop - padBottom;
 
@@ -257,7 +258,9 @@ function drawElevationProfile(trackpoints) {
       ctx.fillText(`${formatDistanceKm(dist / 1000)} km`, x, padTop + chartH + 4);
     }
   }
-  drawTopRightLabel(ctx, `${formatDistanceKm(totalDist / 1000)} km`, padLeft + chartW - 2, padTop + 4);
+  // 総距離ラベルの縦位置を左側の最大標高ラベル（toY(max)）と合わせる
+  // drawTopRightLabel は boxHeight = 12 + paddingY*2 = 16 で描画するため、中心を合わせるには -8
+  drawTopRightLabel(ctx, `${formatDistanceKm(totalDist / 1000)} km`, padLeft + chartW - 2, toY(max) - 8);
 
   // ホバー計算用のジオメトリを保持
   chartState = {
@@ -284,7 +287,7 @@ function drawElevationOverlay(index) {
   ctx.clearRect(0, 0, w, h);
 
   if (index == null || !chartState) return;
-  const { elevations, distances, toX, toY, padTop, chartH } = chartState;
+  const { elevations, distances, toX, toY, padLeft, padTop, chartW, chartH } = chartState;
   if (index < 0 || index >= elevations.length) return;
 
   const x = toX(distances[index]);
@@ -308,6 +311,34 @@ function drawElevationOverlay(index) {
   ctx.arc(x, y, 4, 0, 2 * Math.PI);
   ctx.fill();
   ctx.stroke();
+
+  // 距離と標高のラベル（チャート上の帯に赤文字で、十字線のxに追従）
+  const labelText = `${formatDistanceKm(distances[index] / 1000)} km / ${Math.round(elevations[index])} m`;
+  ctx.save();
+  ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+  const paddingX = 5;
+  const paddingY = 2;
+  const textWidth = ctx.measureText(labelText).width;
+  const boxWidth = textWidth + paddingX * 2;
+  const boxHeight = 13 + paddingY * 2;
+  // 十字線のxを中心にしつつ、チャート横幅内に収まるようクランプ
+  let boxX = x - boxWidth / 2;
+  const minX = padLeft;
+  const maxX = padLeft + chartW - boxWidth;
+  if (boxX < minX) boxX = minX;
+  if (boxX > maxX) boxX = maxX;
+  // チャート上端（padTop）よりさらに上の帯に配置
+  const boxY = Math.max(2, padTop - boxHeight - 2);
+
+  // 視認性のための白背景
+  ctx.fillStyle = 'rgba(248, 250, 252, 0.92)';
+  ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+
+  ctx.fillStyle = '#ef4444';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText(labelText, boxX + paddingX, boxY + paddingY);
+  ctx.restore();
 }
 
 /**
