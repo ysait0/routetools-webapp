@@ -4,9 +4,14 @@
 
 let chartState = null; // { elevations, distances, toX, toY, padTop, chartH } 直近のジオメトリ
 let onProfileHoverCallback = null;
+let onProfileClickCallback = null;
 
 function setProfileHoverHandler(callback) {
   onProfileHoverCallback = callback;
+}
+
+function setProfileClickHandler(callback) {
+  onProfileClickCallback = callback;
 }
 
 /**
@@ -374,6 +379,16 @@ function setupElevationProfile() {
   wrap.addEventListener('mouseleave', () => {
     drawElevationOverlay(null);
     if (onProfileHoverCallback) onProfileHoverCallback(null);
+  });
+  wrap.addEventListener('click', (e) => {
+    if (panel.classList.contains('collapsed')) return;
+    if (!chartState) return;
+    const rect = wrap.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const idx = xToTrackpointIndex(x);
+    if (idx == null) return;
+    drawElevationOverlay(idx);
+    if (onProfileClickCallback) onProfileClickCallback(idx);
   });
 
   // キャンバスのサイズ変化に追従

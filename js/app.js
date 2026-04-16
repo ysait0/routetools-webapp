@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setMarkerHoverHandler(handlePOIMarkerHover);
   setRouteHoverHandler(handleRouteHover);
   setProfileHoverHandler(handleProfileHover);
+  setProfileClickHandler(handleProfileClick);
   setupSidebarResizer();
   setupElevationProfile();
 
@@ -250,15 +251,31 @@ function handleProfileHover(index) {
   setRouteHighlight([tp.latitude, tp.longitude]);
 }
 
+// プロファイル上クリック → 対応するトラックポイント位置でPOI追加ポップアップを開く
+function handleProfileClick(index) {
+  const tp = appState.trackpoints[index];
+  if (!tp) return;
+  setRouteHighlight([tp.latitude, tp.longitude]);
+  drawElevationOverlay(index);
+  handleRouteClick({ lat: tp.latitude, lng: tp.longitude });
+}
+
 function handlePOIMarkerHover(index, hovering) {
   const tr = document.querySelector(`#poi-tbody tr[data-index="${index}"]`);
-  if (!tr) return;
   if (hovering) {
-    tr.classList.add('hover-highlight');
-    // サイドバーが縦に長い場合に該当行を見えるように
-    tr.scrollIntoView({ block: 'nearest' });
+    if (tr) {
+      tr.classList.add('hover-highlight');
+      // サイドバーが縦に長い場合に該当行を見えるように
+      tr.scrollIntoView({ block: 'nearest' });
+    }
+    const poi = appState.pois[index];
+    if (poi && appState.trackpoints && appState.trackpoints.length > 0) {
+      const nearest = findNearestTrackpoint(poi, appState.trackpoints);
+      drawElevationOverlay(nearest.index);
+    }
   } else {
-    tr.classList.remove('hover-highlight');
+    if (tr) tr.classList.remove('hover-highlight');
+    drawElevationOverlay(null);
   }
 }
 
