@@ -2,19 +2,31 @@
 
 [日本語のREADMEはこちら](README.ja.md)
 
-A browser-based SPA for editing route files (GPX / KML / KMZ / TCX) and adding POIs for cycling GPS devices such as Garmin, Wahoo, Bryton, Pioneer, etc.
+A browser-based SPA for converting route files (GPX / KML / KMZ / TCX / FIT) and adding / editing POIs for cycling GPS devices such as Garmin, Wahoo, Bryton, Pioneer, etc.
 
 This is the web counterpart of the CLI tool [routetools-cli](https://github.com/ysait0/routetools-cli). No installation or account required — everything runs in your browser, and your files never leave your device.
 
 ## Features
 
-- Load route files (GPX / KML / KMZ / TCX) and preview them on an interactive map
+- Load route files (GPX / KML / KMZ / TCX / FIT) and preview them on an interactive map
 - Add POIs from another route file or a CSV
 - Add POIs manually by clicking on the route
-- Inline edit POI name, description, and type (Generic / Flag / Straight / Left / Right)
+- Edit POI name, description, and type (Generic / Flag / Straight / Left / Right)
+- Keep POIs sorted in current route order
+- Add Start / Goal POIs
+- Auto-generate and remove turn POIs
+- Reverse the route direction with immediate updates to the map, POI list, and elevation profile
+- Show an elevation profile with cross-highlighting between the map and profile
+- Undo / Redo via buttons and `Ctrl/Cmd+Z`, `Ctrl+Y`, `Cmd+Shift+Z`
 - Adjust tolerance distance and toggle "Force" (snap to nearest route point)
 - Download the result as TCX or GPX
 - Japanese / English UI
+
+## Supported formats
+
+- Route input: `GPX / KML / KMZ / TCX / FIT`
+- POI import: `GPX / KML / KMZ / TCX / FIT / CSV`
+- Output: `TCX / GPX`
 
 ## Usage
 
@@ -23,10 +35,11 @@ Just open the hosted page in your browser:
 **<https://ysait0.github.io/routetools-webapp/>**
 
 1. Drop (or click to select) a route file onto the "Route File" zone
-2. (Optional) Drop another route file or a CSV onto the "Add POI" zone, or click on the route on the map to add POIs manually
-3. Edit POI name / description / type inline in the list
-4. Pick output format (TCX / GPX) and adjust tolerance / force
-5. Click "Download"
+2. Optionally drop another route file or a CSV onto the "Add POI" zone, or click on the route to add POIs manually
+3. Edit POI name / description / type in the list or from a marker popup
+4. Optionally add Start / Goal POIs, auto-generate turn POIs, or reverse the route direction
+5. Review the elevation profile, then pick output format (TCX / GPX) and adjust tolerance / force
+6. Click "Download"
 
 ## CSV format for POI import
 
@@ -64,6 +77,7 @@ python3 -m http.server 8000
 - Vanilla JavaScript (no framework, no build step)
 - [Leaflet](https://leafletjs.com/) for the map
 - [JSZip](https://stuk.github.io/jszip/) for KMZ extraction
+- [fit-file-parser](https://www.npmjs.com/package/fit-file-parser) for FIT import (loaded dynamically in the browser)
 - OpenStreetMap tiles
 
 ## Related
