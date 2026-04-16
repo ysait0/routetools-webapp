@@ -55,10 +55,43 @@ function makeIconForPOI(poi, highlighted) {
 }
 
 function initMap(elementId) {
-  map = L.map(elementId).setView([35.68, 139.77], 10);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
+  map = L.map(elementId, { maxZoom: 20 }).setView([35.68, 139.77], 10);
+
+  // 利用可能なベースタイルレイヤー
+  const baseLayers = {
+    'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 20,
+      maxNativeZoom: 19,
+    }),
+    'CyclOSM': L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
+      attribution: '<a href="https://www.cyclosm.org">CyclOSM</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+      maxZoom: 20,
+      maxNativeZoom: 20,
+    }),
+    '地理院地図 / GSI': L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
+      attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>',
+      maxZoom: 20,
+      maxNativeZoom: 18,
+    }),
+  };
+
+  // 保存されたレイヤーを復元、なければOSMデフォルト
+  let savedName = 'OpenStreetMap';
+  try {
+    const saved = localStorage.getItem('routetools-tile-layer');
+    if (saved && baseLayers[saved]) savedName = saved;
+  } catch (e) { /* localStorage不可 */ }
+  baseLayers[savedName].addTo(map);
+
+  // レイヤー切り替えコントロール
+  L.control.layers(baseLayers, null, { position: 'topright', collapsed: true }).addTo(map);
+
+  // 選択をlocalStorageに保存
+  map.on('baselayerchange', (e) => {
+    try { localStorage.setItem('routetools-tile-layer', e.name); } catch (err) { /* ignore */ }
+  });
+
   routeLayer = L.layerGroup().addTo(map);
   poiLayer = L.layerGroup().addTo(map);
 }
