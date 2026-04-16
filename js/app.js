@@ -150,9 +150,14 @@ function setupEventListeners() {
   // POI削除ボタン
   document.getElementById('btn-remove-poi').addEventListener('click', () => {
     appState.pois = [];
+    appState.lastPOIResults = null;
     updateDisplay();
-    showStatus('POIを全て削除しました');
+    showStatus(t('status.all_poi_removed'));
   });
+
+  // スタート/ゴールPOI追加ボタン
+  document.getElementById('btn-add-start').addEventListener('click', () => addEndpointPOI('start'));
+  document.getElementById('btn-add-goal').addEventListener('click', () => addEndpointPOI('goal'));
 
   // リセットボタン
   document.getElementById('btn-reset').addEventListener('click', handleReset);
@@ -311,6 +316,28 @@ function removePOI(index) {
   appState.lastPOIResults = null;
   updateDisplay();
   showStatus(t('status.poi_removed', { name: removed.name || t('poi.no_name') }));
+}
+
+function addEndpointPOI(endpoint) {
+  if (!appState.trackpoints || appState.trackpoints.length === 0) {
+    showStatus(t('status.error_no_route'), true);
+    return;
+  }
+  const tp = endpoint === 'start'
+    ? appState.trackpoints[0]
+    : appState.trackpoints[appState.trackpoints.length - 1];
+  const name = endpoint === 'start' ? t('poi.start_name') : t('poi.goal_name');
+  appState.pois.push({
+    latitude: tp.latitude,
+    longitude: tp.longitude,
+    name: name,
+    notes: null,
+    type: 'Generic',
+    symbol: null,
+  });
+  appState.lastPOIResults = null;
+  updateDisplay();
+  showStatus(t('status.poi_added_manual', { name: name }));
 }
 
 function updateDisplay() {

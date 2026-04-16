@@ -28,6 +28,12 @@ const translations = {
     'button.remove_poi': 'POI全削除',
     'button.add_poi': '追加',
     'button.cancel': 'キャンセル',
+    'button.add_start': 'スタート追加',
+    'button.add_goal': 'ゴール追加',
+
+    // Start/Goal POI名
+    'poi.start_name': 'スタート',
+    'poi.goal_name': 'ゴール',
 
     // POI追加ポップアップ
     'popup.add_poi_title': 'POIを追加',
@@ -47,7 +53,7 @@ const translations = {
     // ツールチップ
     'tooltip.route_file': 'ベースとなるルートファイル。トラックポイント（ルートの軌跡）を含むファイルを指定します。対応形式: GPX / KML / KMZ / TCX',
     'tooltip.poi_add': '既存のルートにPOIを追加する場合に指定します。ファイル内のPOIのみが抽出され、現在のルートに追加されます。対応形式: GPX / KML / KMZ / TCX / CSV',
-    'tooltip.tolerance': 'POIからルート上の最近傍点までの距離がこの値以下の場合のみ、POIを出力に含めます。',
+    'tooltip.tolerance': 'POIからルート上の最近傍点までの距離がこの値以下の場合のみ、POIを出力に含めます。この値を超えたPOIは「スキップ」として出力から除外されます（ダウンロード後、POI一覧では追加=緑、スキップ=赤で表示）。',
     'tooltip.force': 'ONの場合、POIをルート上の最近傍点に強制配置します。OFFの場合はPOIの元の座標を保持します。TCX出力時は常にON扱いです。',
 
     // ステータスメッセージ
@@ -97,6 +103,12 @@ const translations = {
     'button.remove_poi': 'Remove All POIs',
     'button.add_poi': 'Add',
     'button.cancel': 'Cancel',
+    'button.add_start': 'Add Start',
+    'button.add_goal': 'Add Goal',
+
+    // Start/Goal POI name
+    'poi.start_name': 'Start',
+    'poi.goal_name': 'Goal',
 
     // POI add popup
     'popup.add_poi_title': 'Add POI',
@@ -116,7 +128,7 @@ const translations = {
     // Tooltips
     'tooltip.route_file': 'The base route file containing trackpoints (route path). Supported formats: GPX / KML / KMZ / TCX',
     'tooltip.poi_add': 'Specify this when adding POIs to an existing route. Only POIs are extracted from the file and added to the current route. Supported formats: GPX / KML / KMZ / TCX / CSV',
-    'tooltip.tolerance': 'POIs are included in the output only if the distance to the nearest point on the route is less than or equal to this value.',
+    'tooltip.tolerance': 'POIs are included in the output only if the distance to the nearest point on the route is less than or equal to this value. POIs beyond this distance are "skipped" (excluded). After download, added POIs are shown in green and skipped POIs in red in the list.',
     'tooltip.force': 'When ON, POIs are snapped to the nearest point on the route. When OFF, the original POI coordinates are preserved. TCX output always treats this as ON.',
 
     // Status messages
