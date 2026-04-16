@@ -94,6 +94,34 @@ main {
   border-bottom: 1px solid #e2e8f0;
 }
 
+/* サイドバー上部の説明 */
+.sidebar .intro {
+  background: #f1f5f9;
+  padding: 12px 16px;
+}
+
+.sidebar .intro p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.sidebar .intro .intro-features {
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.sidebar .intro .intro-features strong {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.sidebar .intro .intro-privacy {
+  font-size: 11px;
+  color: #64748b;
+}
+
 .sidebar section h2 {
   font-size: 13px;
   font-weight: 600;

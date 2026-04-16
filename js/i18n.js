@@ -10,6 +10,10 @@ const translations = {
     'section.output_options': '出力オプション',
     'section.poi_list': 'POI一覧',
 
+    // イントロ（サイドバー上部の説明）
+    'intro.features': 'ルートファイル（GPX / KML / KMZ / TCX）の<strong>形式変換</strong>と<strong>POIの追加・編集</strong>ができます。',
+    'intro.privacy': 'ファイルはブラウザ内で処理され、サーバーには送信されません。',
+
     // ラベル
     'label.route_file': 'ルートファイル',
     'label.poi_add': 'POI追加 (任意)',
@@ -84,6 +88,10 @@ const translations = {
     'section.input_files': 'Input Files',
     'section.output_options': 'Output Options',
     'section.poi_list': 'POI List',
+
+    // Intro (top of sidebar)
+    'intro.features': '<strong>Convert</strong> route file formats (GPX / KML / KMZ / TCX) and <strong>add / edit POIs</strong>.',
+    'intro.privacy': 'Files are processed locally in your browser and never sent to any server.',
 
     // Labels
     'label.route_file': 'Route File',
@@ -202,6 +210,12 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     el.textContent = t(key);
+  });
+
+  // data-i18n-html属性を持つ要素のinnerHTMLを更新（<strong>などのマークアップ可）
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.dataset.i18nHtml;
+    el.innerHTML = t(key);
   });
 
   // data-i18n-tooltip属性を持つ要素のdata-tooltipを更新
