@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>routetools</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1 data-i18n="header.title">routetools</h1>
+    <span id="status" class="status" data-i18n="header.initial_status">ルートファイルを読み込んでください</span>
+    <div class="lang-select">
+      <select id="language-selector" aria-label="Language">
+        <option value="ja">日本語</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <section>
+        <h2 data-i18n="section.input_files">入力ファイル</h2>
+        <div class="file-group">
+          <div class="file-label">
+            <span data-i18n="label.route_file">ルートファイル</span>
+            <span class="info-icon" data-i18n-tooltip="tooltip.route_file" data-tooltip=""></span>
+          </div>
+          <label class="drop-zone-mini" id="route-drop-zone" for="route-file">
+            <p class="default-text" data-i18n="dropzone.default">ドラッグ&ドロップ / クリックで選択</p>
+            <p class="hint">GPX / KML / KMZ / TCX</p>
+            <p class="loaded-file" id="route-filename"></p>
+            <input type="file" id="route-file" accept=".gpx,.kml,.kmz,.tcx" hidden />
+          </label>
+        </div>
+        <div class="file-group">
+          <div class="file-label">
+            <span data-i18n="label.poi_add">POI追加 (任意)</span>
+            <span class="info-icon" data-i18n-tooltip="tooltip.poi_add" data-tooltip=""></span>
+          </div>
+          <label class="drop-zone-mini" id="poi-drop-zone" for="poi-file">
+            <p class="default-text" data-i18n="dropzone.default">ドラッグ&ドロップ / クリックで選択</p>
+            <p class="hint">GPX / KML / KMZ / TCX / CSV</p>
+            <p class="loaded-file" id="poi-filename"></p>
+            <input type="file" id="poi-file" accept=".gpx,.kml,.kmz,.tcx,.csv" hidden />
+          </label>
+        </div>
+        <div id="route-info"></div>
+        <button class="btn btn-secondary" id="btn-reset" data-i18n="button.reset">リセット</button>
+      </section>
+
+      <section>
+        <h2 data-i18n="section.output_options">出力オプション</h2>
+        <div class="option-group">
+          <label for="out-type" data-i18n="label.out_type">出力形式</label>
+          <select id="out-type">
+            <option value="TCX">TCX</option>
+            <option value="GPX">GPX</option>
+          </select>
+        </div>
+        <div class="option-group">
+          <label for="tolerance">
+            <span data-i18n="label.tolerance">許容距離 (m)</span>
+            <span class="info-icon" data-i18n-tooltip="tooltip.tolerance" data-tooltip=""></span>
+          </label>
+          <input type="number" id="tolerance" value="100" min="0" step="10" />
+        </div>
+        <div class="option-group">
+          <label for="force">
+            <span data-i18n="label.force">Force</span>
+            <span class="info-icon" data-i18n-tooltip="tooltip.force" data-tooltip=""></span>
+          </label>
+          <input type="checkbox" id="force" />
+          <span class="option-caption" data-i18n="label.force_caption">最近傍点に配置</span>
+        </div>
+        <button class="btn btn-primary" id="btn-download" data-i18n="button.download">ダウンロード</button>
+        <button class="btn btn-danger" id="btn-remove-poi" data-i18n="button.remove_poi">POI全削除</button>
+      </section>
+
+      <section class="poi-list">
+        <h2 data-i18n="section.poi_list">POI一覧</h2>
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="table.num">#</th>
+              <th data-i18n="table.name">名前</th>
+              <th data-i18n="table.description">説明</th>
+              <th data-i18n="table.type">タイプ</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="poi-tbody">
+            <tr><td colspan="5" class="empty" data-i18n="table.empty">POIなし</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </aside>
+
+    <div id="map"></div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/geo.js"></script>
+  <script src="js/parsers.js"></script>
+  <script src="js/builders.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
