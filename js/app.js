@@ -534,7 +534,8 @@ async function loadRouteFile(file) {
     }
     saveHistoryPoint();
     appState.metadata = result.metadata;
-    appState.trackpoints = result.trackpoints;
+    const normalizedRoute = removeNearDuplicateStraightTrackpoints(result.trackpoints);
+    appState.trackpoints = normalizedRoute.trackpoints;
     appState.pois = result.pois || [];
     appState.lastPOIResults = null;
     // ダウンロード時のデフォルト名用に、拡張子を除いたファイル名を保持
@@ -544,11 +545,15 @@ async function loadRouteFile(file) {
     document.getElementById('reverse').checked = false;
     setFilename('route', file.name);
     updateDisplay();
-    showStatus(t('status.loaded', {
+    const loadedMessage = t('status.loaded', {
       filename: file.name,
       count: appState.trackpoints.length,
       poiCount: appState.pois.length,
-    }));
+    });
+    const filteredMessage = normalizedRoute.removedCount > 0
+      ? ` / ${t('status.trackpoints_filtered', { count: normalizedRoute.removedCount })}`
+      : '';
+    showStatus(loadedMessage + filteredMessage);
   } catch (err) {
     showStatus(t('status.error', { message: err.message }), true);
   }
