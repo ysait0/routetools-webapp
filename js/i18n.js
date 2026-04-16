@@ -14,6 +14,9 @@ const translations = {
     'intro.features': 'ルートファイル（GPX / KML / KMZ / TCX）の<strong>形式変換</strong>と<strong>POIの追加・編集</strong>ができます。',
     'intro.privacy': 'ファイルはブラウザ内で処理され、サーバーには送信されません。',
 
+    // ヒント
+    'hint.poi_list': 'ルート上を<strong>クリック</strong>でPOI追加。一覧の行またはマーカーを<strong>クリック</strong>で編集できます。',
+
     // ラベル
     'label.route_file': 'ルートファイル',
     'label.poi_add': 'POI追加 (任意)',
@@ -34,13 +37,22 @@ const translations = {
     'button.cancel': 'キャンセル',
     'button.add_start': 'スタート追加',
     'button.add_goal': 'ゴール追加',
+    'button.auto_turn': '右左折POIを自動追加 (beta)',
+    'button.remove_auto': '自動追加POIを削除',
+    'button.save': '保存',
+    'button.delete': '削除',
 
     // Start/Goal POI名
     'poi.start_name': 'スタート',
     'poi.goal_name': 'ゴール',
 
+    // 右左折POI名
+    'poi.turn_left': '左折',
+    'poi.turn_right': '右折',
+
     // POI追加ポップアップ
     'popup.add_poi_title': 'POIを追加',
+    'popup.edit_poi_title': 'POIを編集',
     'placeholder.poi_name': '名前を入力',
     'placeholder.poi_notes': '説明を入力（任意）',
     'placeholder.poi_type': 'タイプ（任意）',
@@ -72,6 +84,11 @@ const translations = {
     'status.poi_added': 'POI追加完了: {count}件追加 (合計: {total}件)',
     'status.poi_removed': 'POIを削除しました: {name}',
     'status.poi_added_manual': 'POIを追加しました: {name}',
+    'status.poi_updated': 'POIを更新しました: {name}',
+    'status.auto_turn_added': '右左折POIを{count}件追加しました',
+    'status.auto_turn_none': '右左折POIは検出されませんでした',
+    'status.auto_removed': '自動追加POIを{count}件削除しました',
+    'status.no_auto_pois': '自動追加POIはありません',
     'status.download_complete': 'ダウンロード完了: POI {added}件追加, {skipped}件スキップ',
     'status.error': 'エラー: {message}',
     'route_info': 'トラックポイント: {count}点 / 距離: {km} km',
@@ -93,6 +110,9 @@ const translations = {
     'intro.features': '<strong>Convert</strong> route file formats (GPX / KML / KMZ / TCX) and <strong>add / edit POIs</strong>.',
     'intro.privacy': 'Files are processed locally in your browser and never sent to any server.',
 
+    // Hints
+    'hint.poi_list': '<strong>Click</strong> on the route to add a POI. <strong>Click</strong> a row or marker to edit.',
+
     // Labels
     'label.route_file': 'Route File',
     'label.poi_add': 'Add POI (optional)',
@@ -113,13 +133,22 @@ const translations = {
     'button.cancel': 'Cancel',
     'button.add_start': 'Add Start',
     'button.add_goal': 'Add Goal',
+    'button.auto_turn': 'Auto-generate Turn POIs (beta)',
+    'button.remove_auto': 'Remove Auto-added POIs',
+    'button.save': 'Save',
+    'button.delete': 'Delete',
 
     // Start/Goal POI name
     'poi.start_name': 'Start',
     'poi.goal_name': 'Goal',
 
+    // Turn POI name
+    'poi.turn_left': 'Left',
+    'poi.turn_right': 'Right',
+
     // POI add popup
     'popup.add_poi_title': 'Add POI',
+    'popup.edit_poi_title': 'Edit POI',
     'placeholder.poi_name': 'Enter name',
     'placeholder.poi_notes': 'Enter description (optional)',
     'placeholder.poi_type': 'Type (optional)',
@@ -151,6 +180,11 @@ const translations = {
     'status.poi_added': 'POIs added: {count} (total: {total})',
     'status.poi_removed': 'POI removed: {name}',
     'status.poi_added_manual': 'POI added: {name}',
+    'status.poi_updated': 'POI updated: {name}',
+    'status.auto_turn_added': '{count} turn POIs added',
+    'status.auto_turn_none': 'No turns detected',
+    'status.auto_removed': 'Removed {count} auto-added POIs',
+    'status.no_auto_pois': 'No auto-added POIs to remove',
     'status.download_complete': 'Download complete: {added} POIs added, {skipped} skipped',
     'status.error': 'Error: {message}',
     'route_info': 'Trackpoints: {count} / Distance: {km} km',

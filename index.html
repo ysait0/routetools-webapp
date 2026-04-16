@@ -100,10 +100,17 @@
 
       <section class="poi-list">
         <h2 data-i18n="section.poi_list">POI一覧</h2>
+        <p class="section-hint" data-i18n-html="hint.poi_list">ルート上を<strong>クリック</strong>でPOI追加。一覧の行またはマーカーを<strong>クリック</strong>で編集できます。</p>
         <button class="btn btn-danger" id="btn-remove-poi" data-i18n="button.remove_poi">POI全削除</button>
         <div class="poi-list-actions">
           <button class="btn btn-secondary" id="btn-add-start" data-i18n="button.add_start">スタート追加</button>
           <button class="btn btn-secondary" id="btn-add-goal" data-i18n="button.add_goal">ゴール追加</button>
+        </div>
+        <div class="poi-list-actions">
+          <button class="btn btn-secondary" id="btn-auto-turn" data-i18n="button.auto_turn">右左折POIを自動追加 (beta)</button>
+        </div>
+        <div class="poi-list-actions">
+          <button class="btn btn-secondary" id="btn-remove-auto" data-i18n="button.remove_auto">自動追加POIを削除</button>
         </div>
         <table>
           <thead>
@@ -121,6 +128,8 @@
         </table>
       </section>
     </aside>
+
+    <div class="sidebar-resizer" id="sidebar-resizer" title="ドラッグで幅変更"></div>
 
     <div id="map"></div>
   </main>

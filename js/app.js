@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   setupInfoTooltips();
   setRouteClickHandler(handleRouteClick);
+  setMarkerClickHandler(handlePOIMarkerClick);
+  setMarkerHoverHandler(handlePOIMarkerHover);
+  setupSidebarResizer();
 
   // 言語セレクタ
   document.getElementById('language-selector').addEventListener('change', (e) => {
@@ -93,9 +96,140 @@ function handleRouteClick(latlng) {
   }, 0);
 }
 
+function handlePOIMarkerHover(index, hovering) {
+  const tr = document.querySelector(`#poi-tbody tr[data-index="${index}"]`);
+  if (!tr) return;
+  if (hovering) {
+    tr.classList.add('hover-highlight');
+    // サイドバーが縦に長い場合に該当行を見えるように
+    tr.scrollIntoView({ block: 'nearest' });
+  } else {
+    tr.classList.remove('hover-highlight');
+  }
+}
+
+function handlePOIMarkerClick(index) {
+  const poi = appState.pois[index];
+  if (!poi) return;
+
+  const content = `
+    <div class="poi-add-popup">
+      <h3>${t('popup.edit_poi_title')}</h3>
+      <input type="text" id="edit-poi-name" placeholder="${t('placeholder.poi_name')}" value="${escapeHtml(poi.name) || ''}" />
+      <input type="text" id="edit-poi-notes" placeholder="${t('placeholder.poi_notes')}" value="${escapeHtml(poi.notes) || ''}" />
+      <select id="edit-poi-type">${buildPoiTypeOptions(poi.type)}</select>
+      <div class="popup-actions">
+        <button class="btn btn-danger" id="btn-delete-poi-popup">${t('button.delete')}</button>
+        <button class="btn btn-secondary" id="btn-cancel-edit-poi">${t('button.cancel')}</button>
+        <button class="btn btn-primary" id="btn-save-poi">${t('button.save')}</button>
+      </div>
+    </div>
+  `;
+
+  const popup = L.popup({ closeButton: true, minWidth: 240 })
+    .setLatLng([poi.latitude, poi.longitude])
+    .setContent(content)
+    .openOn(getMap());
+
+  setTimeout(() => {
+    const nameInput = document.getElementById('edit-poi-name');
+    if (nameInput) {
+      nameInput.focus();
+      nameInput.select();
+    }
+
+    const save = () => {
+      const name = (document.getElementById('edit-poi-name').value || '').trim();
+      const notes = (document.getElementById('edit-poi-notes').value || '').trim();
+      const type = document.getElementById('edit-poi-type').value || 'Generic';
+      if (!appState.pois[index]) return;
+      appState.pois[index].name = name || null;
+      appState.pois[index].notes = notes || null;
+      appState.pois[index].type = type;
+      appState.lastPOIResults = null;
+      getMap().closePopup(popup);
+      updateDisplay();
+      showStatus(t('status.poi_updated', { name: name || t('poi.no_name') }));
+    };
+
+    const cancel = () => getMap().closePopup(popup);
+
+    const del = () => {
+      getMap().closePopup(popup);
+      removePOI(index);
+    };
+
+    document.getElementById('btn-save-poi').addEventListener('click', save);
+    document.getElementById('btn-cancel-edit-poi').addEventListener('click', cancel);
+    document.getElementById('btn-delete-poi-popup').addEventListener('click', del);
+    // Enterキーで確定（IME中は無視）
+    ['edit-poi-name', 'edit-poi-notes'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', (e) => {
+        if (e.isComposing || e.keyCode === 229) return;
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          save();
+        }
+      });
+    });
+  }, 0);
+}
+
 // i18nから呼ばれる再描画ハンドラ
 function onLanguageChanged() {
   updateDisplay();
+}
+
+function setupSidebarResizer() {
+  const sidebar = document.querySelector('.sidebar');
+  const resizer = document.getElementById('sidebar-resizer');
+  if (!sidebar || !resizer) return;
+
+  const MIN_WIDTH = 240;
+  const MAX_WIDTH = 720;
+
+  // 保存された幅を復元
+  try {
+    const saved = localStorage.getItem('routetools-sidebar-width');
+    if (saved) {
+      const w = parseInt(saved, 10);
+      if (w >= MIN_WIDTH && w <= MAX_WIDTH) sidebar.style.width = w + 'px';
+    }
+  } catch (e) { /* localStorage不可 */ }
+
+  let dragging = false;
+
+  resizer.addEventListener('mousedown', (e) => {
+    dragging = true;
+    resizer.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const mainEl = document.querySelector('main');
+    const rect = mainEl.getBoundingClientRect();
+    const newWidth = e.clientX - rect.left;
+    const clamped = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
+    sidebar.style.width = clamped + 'px';
+    // 地図サイズが変わったのでLeafletに再計算を促す
+    const m = getMap();
+    if (m) m.invalidateSize();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    resizer.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    try {
+      const w = parseInt(sidebar.style.width, 10);
+      if (w) localStorage.setItem('routetools-sidebar-width', String(w));
+    } catch (e) { /* ignore */ }
+  });
 }
 
 function setupInfoTooltips() {
@@ -158,6 +292,10 @@ function setupEventListeners() {
   // スタート/ゴールPOI追加ボタン
   document.getElementById('btn-add-start').addEventListener('click', () => addEndpointPOI('start'));
   document.getElementById('btn-add-goal').addEventListener('click', () => addEndpointPOI('goal'));
+
+  // 右左折自動追加 / 自動追加POI削除
+  document.getElementById('btn-auto-turn').addEventListener('click', handleAutoTurn);
+  document.getElementById('btn-remove-auto').addEventListener('click', handleRemoveAutoPOIs);
 
   // リセットボタン
   document.getElementById('btn-reset').addEventListener('click', handleReset);
@@ -340,6 +478,46 @@ function addEndpointPOI(endpoint) {
   showStatus(t('status.poi_added_manual', { name: name }));
 }
 
+function handleAutoTurn() {
+  if (!appState.trackpoints || appState.trackpoints.length < 3) {
+    showStatus(t('status.error_no_route'), true);
+    return;
+  }
+  const turns = detectTurns(appState.trackpoints);
+  if (turns.length === 0) {
+    showStatus(t('status.auto_turn_none'));
+    return;
+  }
+  for (const turn of turns) {
+    const name = turn.direction === 'Left' ? t('poi.turn_left') : t('poi.turn_right');
+    appState.pois.push({
+      latitude: turn.point.latitude,
+      longitude: turn.point.longitude,
+      name: name,
+      notes: null,
+      type: turn.direction,
+      symbol: null,
+      autoGenerated: true,
+    });
+  }
+  appState.lastPOIResults = null;
+  updateDisplay();
+  showStatus(t('status.auto_turn_added', { count: turns.length }));
+}
+
+function handleRemoveAutoPOIs() {
+  const before = appState.pois.length;
+  appState.pois = appState.pois.filter(p => !p.autoGenerated);
+  const removed = before - appState.pois.length;
+  if (removed === 0) {
+    showStatus(t('status.no_auto_pois'));
+    return;
+  }
+  appState.lastPOIResults = null;
+  updateDisplay();
+  showStatus(t('status.auto_removed', { count: removed }));
+}
+
 function updateDisplay() {
   displayRoute(appState.trackpoints);
   displayPOIs(appState.pois);
@@ -372,6 +550,7 @@ function updatePOIList() {
   for (let i = 0; i < appState.pois.length; i++) {
     const poi = appState.pois[i];
     const tr = document.createElement('tr');
+    tr.dataset.index = i;
     // ダウンロード結果があれば行にステータスを反映
     const res = appState.lastPOIResults && appState.lastPOIResults[i];
     if (res) {
@@ -385,6 +564,9 @@ function updatePOIList() {
       <td><select class="poi-type-select" data-index="${i}">${buildPoiTypeOptions(poi.type)}</select></td>
       <td><button class="btn-delete-poi" data-index="${i}" title="${t('button.remove_poi')}">×</button></td>
     `;
+    // 行ホバーで対応する地図上のPOIをハイライト
+    tr.addEventListener('mouseenter', () => highlightPOIMarker(i));
+    tr.addEventListener('mouseleave', () => unhighlightPOIMarker(i));
     tbody.appendChild(tr);
   }
 

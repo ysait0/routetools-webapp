@@ -319,8 +319,19 @@ main {
 
 /* POIテーブル */
 .poi-list {
-  flex: 1;
-  overflow-y: auto;
+  /* サイドバー全体でスクロールさせるので、ここでは overflow を設定しない */
+}
+
+.section-hint {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.section-hint strong {
+  color: #2563eb;
+  font-weight: 600;
 }
 
 .poi-list-actions {
@@ -366,6 +377,11 @@ main {
 
 .poi-list tr.added td {
   background: #f0fdf4;
+}
+
+/* 地図上のマーカーホバー時のハイライト（.skipped/.addedより後に定義して優先） */
+.poi-list tr.hover-highlight td {
+  background: #fef3c7;
 }
 
 .poi-list .empty {
@@ -448,6 +464,21 @@ main {
   border-color: #2563eb;
 }
 
+/* サイドバーのリサイズハンドル */
+.sidebar-resizer {
+  width: 5px;
+  background: #e2e8f0;
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.dragging {
+  background: #2563eb;
+}
+
 /* 地図 */
 #map {
   flex: 1;
@@ -456,6 +487,18 @@ main {
 /* ルートのカーソル */
 .leaflet-interactive {
   cursor: pointer;
+}
+
+/* POIマーカー (divIconのデフォルト余白を除去) */
+.poi-marker-icon {
+  background: none;
+  border: none;
+  transition: transform 0.15s;
+}
+
+.poi-marker-icon svg {
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 /* POI追加ポップアップ */
@@ -494,4 +537,5 @@ main {
   padding: 5px 10px;
   font-size: 12px;
   margin-top: 0;
+  white-space: nowrap;
 }
