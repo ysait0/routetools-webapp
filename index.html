@@ -24,9 +24,9 @@
 </head>
 <body>
   <header>
-    <h1 data-i18n="header.title">routetools</h1>
+    <h1 id="app-title" data-i18n="header.title" title="クリックでリロード">routetools</h1>
     <span id="status" class="status" data-i18n="header.initial_status">ルートファイルを読み込んでください</span>
-    <a class="version-badge" href="https://github.com/ysait0/routetools-webapp" target="_blank" rel="noopener">v1.2.0</a>
+    <a class="version-badge" href="https://github.com/ysait0/routetools-webapp" target="_blank" rel="noopener">v1.3.0</a>
     <div class="lang-select">
       <select id="language-selector" aria-label="Language">
         <option value="ja">日本語</option>
@@ -50,9 +50,9 @@
           </div>
           <label class="drop-zone-mini" id="route-drop-zone" for="route-file">
             <p class="default-text" data-i18n="dropzone.default">ドラッグ&ドロップ / クリックで選択</p>
-            <p class="hint">GPX / KML / KMZ / TCX</p>
+            <p class="hint">GPX / KML / KMZ / TCX / FIT</p>
             <p class="loaded-file" id="route-filename"></p>
-            <input type="file" id="route-file" accept=".gpx,.kml,.kmz,.tcx" hidden />
+            <input type="file" id="route-file" accept=".gpx,.kml,.kmz,.tcx,.fit" hidden />
           </label>
         </div>
         <div class="file-group">
@@ -62,9 +62,9 @@
           </div>
           <label class="drop-zone-mini" id="poi-drop-zone" for="poi-file">
             <p class="default-text" data-i18n="dropzone.default">ドラッグ&ドロップ / クリックで選択</p>
-            <p class="hint">GPX / KML / KMZ / TCX / CSV</p>
+            <p class="hint">GPX / KML / KMZ / TCX / FIT / CSV</p>
             <p class="loaded-file" id="poi-filename"></p>
-            <input type="file" id="poi-file" accept=".gpx,.kml,.kmz,.tcx,.csv" hidden />
+            <input type="file" id="poi-file" accept=".gpx,.kml,.kmz,.tcx,.fit,.csv" hidden />
           </label>
         </div>
         <div id="route-info"></div>
@@ -136,6 +136,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+  <!-- fit-file-parser は parsers.js 内で動的 import (esm.sh) して利用 -->
   <script src="js/i18n.js"></script>
   <script src="js/geo.js"></script>
   <script src="js/parsers.js"></script>

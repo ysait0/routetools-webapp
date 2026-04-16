@@ -11,7 +11,7 @@ const translations = {
     'section.poi_list': 'POI一覧',
 
     // イントロ（サイドバー上部の説明）
-    'intro.features': 'ルートファイル（GPX / KML / KMZ / TCX）の<strong>形式変換</strong>と<strong>POIの追加・編集</strong>ができます。',
+    'intro.features': 'ルートファイル（GPX / KML / KMZ / TCX / FIT）の<strong>形式変換</strong>と<strong>POIの追加・編集</strong>ができます。',
     'intro.privacy': 'ファイルはブラウザ内で処理され、サーバーには送信されません。',
 
     // ヒント
@@ -67,8 +67,8 @@ const translations = {
     'table.empty': 'POIなし',
 
     // ツールチップ
-    'tooltip.route_file': 'ベースとなるルートファイル。トラックポイント（ルートの軌跡）を含むファイルを指定します。対応形式: GPX / KML / KMZ / TCX',
-    'tooltip.poi_add': '既存のルートにPOIを追加する場合に指定します。ファイル内のPOIのみが抽出され、現在のルートに追加されます。対応形式: GPX / KML / KMZ / TCX / CSV',
+    'tooltip.route_file': 'ベースとなるルートファイル。トラックポイント（ルートの軌跡）を含むファイルを指定します。対応形式: GPX / KML / KMZ / TCX / FIT',
+    'tooltip.poi_add': '既存のルートにPOIを追加する場合に指定します。ファイル内のPOIのみが抽出され、現在のルートに追加されます。対応形式: GPX / KML / KMZ / TCX / FIT / CSV',
     'tooltip.tolerance': 'POIからルート上の最近傍点までの距離がこの値以下の場合のみ、POIを出力に含めます。この値を超えたPOIは「スキップ」として出力から除外されます（ダウンロード後、POI一覧では追加=緑、スキップ=赤で表示）。',
     'tooltip.force': 'ONの場合、POIをルート上の最近傍点に強制配置します。OFFの場合はPOIの元の座標を保持します。TCX出力時は常にON扱いです。',
 
@@ -107,7 +107,7 @@ const translations = {
     'section.poi_list': 'POI List',
 
     // Intro (top of sidebar)
-    'intro.features': '<strong>Convert</strong> route file formats (GPX / KML / KMZ / TCX) and <strong>add / edit POIs</strong>.',
+    'intro.features': '<strong>Convert</strong> route file formats (GPX / KML / KMZ / TCX / FIT) and <strong>add / edit POIs</strong>.',
     'intro.privacy': 'Files are processed locally in your browser and never sent to any server.',
 
     // Hints
@@ -163,8 +163,8 @@ const translations = {
     'table.empty': 'No POIs',
 
     // Tooltips
-    'tooltip.route_file': 'The base route file containing trackpoints (route path). Supported formats: GPX / KML / KMZ / TCX',
-    'tooltip.poi_add': 'Specify this when adding POIs to an existing route. Only POIs are extracted from the file and added to the current route. Supported formats: GPX / KML / KMZ / TCX / CSV',
+    'tooltip.route_file': 'The base route file containing trackpoints (route path). Supported formats: GPX / KML / KMZ / TCX / FIT',
+    'tooltip.poi_add': 'Specify this when adding POIs to an existing route. Only POIs are extracted from the file and added to the current route. Supported formats: GPX / KML / KMZ / TCX / FIT / CSV',
     'tooltip.tolerance': 'POIs are included in the output only if the distance to the nearest point on the route is less than or equal to this value. POIs beyond this distance are "skipped" (excluded). After download, added POIs are shown in green and skipped POIs in red in the list.',
     'tooltip.force': 'When ON, POIs are snapped to the nearest point on the route. When OFF, the original POI coordinates are preserved. TCX output always treats this as ON.',
 

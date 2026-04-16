@@ -7,6 +7,7 @@ let appState = {
   trackpoints: [],
   pois: [],
   lastPOIResults: null,  // 最後のビルド結果（言語切替時の再描画用）
+  originalFilename: null, // アップロード時の元ファイル名（拡張子なし）
 };
 
 function buildPoiTypeOptions(currentType) {
@@ -30,6 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
   setMarkerClickHandler(handlePOIMarkerClick);
   setMarkerHoverHandler(handlePOIMarkerHover);
   setupSidebarResizer();
+
+  // タイトルクリックでリロード
+  document.getElementById('app-title').addEventListener('click', () => {
+    location.reload();
+  });
 
   // 言語セレクタ
   document.getElementById('language-selector').addEventListener('change', (e) => {
@@ -346,6 +352,8 @@ async function loadRouteFile(file) {
     appState.trackpoints = result.trackpoints;
     appState.pois = result.pois || [];
     appState.lastPOIResults = null;
+    // ダウンロード時のデフォルト名用に、拡張子を除いたファイル名を保持
+    appState.originalFilename = file.name.replace(/\.[^./\\]+$/, '');
     setFilename('route', file.name);
     updateDisplay();
     showStatus(t('status.loaded', {
@@ -421,12 +429,16 @@ function handleDownload() {
   updatePOIList();
 
   // ダウンロード
+  // 元ファイル名 > metadata.name > 'route' の優先順位
+  // 上書き防止のため -routetools サフィックスを付与
+  const baseName = appState.originalFilename
+    || (appState.metadata && appState.metadata.name)
+    || 'route';
   const blob = new Blob([result.xml], { type: 'application/xml' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const baseName = (appState.metadata && appState.metadata.name) || 'route';
   a.href = url;
-  a.download = `${baseName}.${outType.toLowerCase()}`;
+  a.download = `${baseName}-routetools.${outType.toLowerCase()}`;
   a.click();
   URL.revokeObjectURL(url);
 
@@ -440,6 +452,7 @@ function handleReset() {
   appState.trackpoints = [];
   appState.pois = [];
   appState.lastPOIResults = null;
+  appState.originalFilename = null;
   document.getElementById('route-file').value = '';
   document.getElementById('poi-file').value = '';
   setFilename('route', '');
