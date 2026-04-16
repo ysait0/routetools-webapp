@@ -13,7 +13,8 @@ const translations = {
 
     // イントロ（サイドバー上部の説明）
     'intro.features': 'ルートファイル（GPX / KML / KMZ / TCX / FIT）の<strong>形式変換</strong>と<strong>POIの追加・編集</strong>ができます。',
-    'intro.privacy': 'ファイルはブラウザ内で処理され、サーバーには送信されません。',
+    'intro.privacy': '※ ファイルはブラウザ内で処理され、サーバーには送信されません。',
+    'intro.read_more': '詳しくはこちら',
 
     // ヒント
     'hint.poi_list': 'ルート上を<strong>クリック</strong>でPOI追加。一覧の行またはマーカーを<strong>クリック</strong>で編集できます。',
@@ -123,7 +124,8 @@ const translations = {
 
     // Intro (top of sidebar)
     'intro.features': '<strong>Convert</strong> route file formats (GPX / KML / KMZ / TCX / FIT) and <strong>add / edit POIs</strong>.',
-    'intro.privacy': 'Files are processed locally in your browser and never sent to any server.',
+    'intro.privacy': '※ Files are processed locally in your browser and never sent to any server.',
+    'intro.read_more': 'Read more',
 
     // Hints
     'hint.poi_list': '<strong>Click</strong> on the route to add a POI. <strong>Click</strong> a row or marker to edit.',
@@ -298,6 +300,14 @@ function applyTranslations() {
   // 言語セレクタの選択状態を更新
   const selector = document.getElementById('language-selector');
   if (selector) selector.value = currentLang;
+
+  // READMEリンクの文言とリンク先を現在言語に合わせる
+  const readmeLink = document.getElementById('intro-readme-link');
+  if (readmeLink) {
+    readmeLink.href = currentLang === 'ja'
+      ? 'https://github.com/ysait0/routetools-webapp/blob/main/README.ja.md'
+      : 'https://github.com/ysait0/routetools-webapp/blob/main/README.md';
+  }
 
   // アプリ側に再描画を依頼
   if (typeof onLanguageChanged === 'function') {
