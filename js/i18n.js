@@ -24,6 +24,8 @@ const translations = {
     'label.tolerance': '許容距離 (m)',
     'label.force': 'Force',
     'label.force_caption': '最近傍点に配置',
+    'label.reverse': '逆走',
+    'label.reverse_caption': 'ルート方向を反転',
     'label.language': '言語',
 
     // ドロップゾーン
@@ -71,6 +73,7 @@ const translations = {
     'tooltip.poi_add': '既存のルートにPOIを追加する場合に指定します。ファイル内のPOIのみが抽出され、現在のルートに追加されます。対応形式: GPX / KML / KMZ / TCX / FIT / CSV',
     'tooltip.tolerance': 'POIからルート上の最近傍点までの距離がこの値以下の場合のみ、POIを出力に含めます。この値を超えたPOIは「スキップ」として出力から除外されます（ダウンロード後、POI一覧では追加=緑、スキップ=赤で表示）。',
     'tooltip.force': 'ONの場合、POIをルート上の最近傍点に強制配置します。OFFの場合はPOIの元の座標を保持します。TCX出力時は常にON扱いです。',
+    'tooltip.reverse': 'ONの場合、出力ファイルのルート方向を反転します（スタートとゴールが入れ替わります）。画面上の表示や読み込み済みデータは変更されず、ダウンロード時にのみ反映されます。',
 
     // ステータスメッセージ
     'status.loading': 'ファイルを読み込み中...',
@@ -121,6 +124,8 @@ const translations = {
     'label.tolerance': 'Tolerance (m)',
     'label.force': 'Force',
     'label.force_caption': 'Snap to nearest point',
+    'label.reverse': 'Reverse',
+    'label.reverse_caption': 'Reverse route direction',
     'label.language': 'Language',
 
     // Drop zone
@@ -168,6 +173,7 @@ const translations = {
     'tooltip.poi_add': 'Specify this when adding POIs to an existing route. Only POIs are extracted from the file and added to the current route. Supported formats: GPX / KML / KMZ / TCX / FIT / CSV',
     'tooltip.tolerance': 'POIs are included in the output only if the distance to the nearest point on the route is less than or equal to this value. POIs beyond this distance are "skipped" (excluded). After download, added POIs are shown in green and skipped POIs in red in the list.',
     'tooltip.force': 'When ON, POIs are snapped to the nearest point on the route. When OFF, the original POI coordinates are preserved. TCX output always treats this as ON.',
+    'tooltip.reverse': 'When ON, the output file has its route direction reversed (start and goal are swapped). The on-screen display and loaded data are not affected — this only applies at download time.',
 
     // Status messages
     'status.loading': 'Loading file...',

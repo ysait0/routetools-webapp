@@ -414,14 +414,50 @@ function handleDownload() {
   const outType = document.getElementById('out-type').value;
   const tolerance = parseFloat(document.getElementById('tolerance').value);
   const force = document.getElementById('force').checked;
+  const reverse = document.getElementById('reverse').checked;
+
+  // 逆走オプションON時は出力用のトラックポイントを反転
+  // （distance は累積値なので、反転後に再計算するためクリアする）
+  const trackpointsForOutput = reverse
+    ? appState.trackpoints.slice().reverse().map(tp => ({ ...tp, distance: null }))
+    : appState.trackpoints;
+
+  // 逆走時はスタート/ゴール POI の名前を入れ替える（出力用のコピーに対してのみ）
+  // - 元の trackpoints 先頭座標にある POI で、名前がスタート（全言語）→ ゴール名に
+  // - 元の trackpoints 末尾座標にある POI で、名前がゴール（全言語）→ スタート名に
+  let poisForOutput = appState.pois;
+  if (reverse && appState.trackpoints.length >= 2) {
+    const first = appState.trackpoints[0];
+    const last = appState.trackpoints[appState.trackpoints.length - 1];
+    const startKey = coordKey(first.latitude, first.longitude);
+    const goalKey = coordKey(last.latitude, last.longitude);
+    const startNames = new Set(
+      Object.values(translations).map(dict => dict['poi.start_name']).filter(Boolean)
+    );
+    const goalNames = new Set(
+      Object.values(translations).map(dict => dict['poi.goal_name']).filter(Boolean)
+    );
+    const newStartName = t('poi.start_name');
+    const newGoalName = t('poi.goal_name');
+    poisForOutput = appState.pois.map(poi => {
+      const key = coordKey(poi.latitude, poi.longitude);
+      if (key === startKey && startNames.has(poi.name)) {
+        return { ...poi, name: newGoalName };
+      }
+      if (key === goalKey && goalNames.has(poi.name)) {
+        return { ...poi, name: newStartName };
+      }
+      return poi;
+    });
+  }
 
   const options = { tolerance, force };
   let result;
 
   if (outType === 'GPX') {
-    result = buildGPX(appState.metadata, appState.trackpoints, appState.pois, options);
+    result = buildGPX(appState.metadata, trackpointsForOutput, poisForOutput, options);
   } else {
-    result = buildTCX(appState.metadata, appState.trackpoints, appState.pois, options);
+    result = buildTCX(appState.metadata, trackpointsForOutput, poisForOutput, options);
   }
 
   // 各POIに処理結果を付与（表示用、データ本体は変更しない）

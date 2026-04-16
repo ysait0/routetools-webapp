@@ -26,7 +26,7 @@
   <header>
     <h1 id="app-title" data-i18n="header.title" title="クリックでリロード">routetools</h1>
     <span id="status" class="status" data-i18n="header.initial_status">ルートファイルを読み込んでください</span>
-    <a class="version-badge" href="https://github.com/ysait0/routetools-webapp" target="_blank" rel="noopener">v1.4.0</a>
+    <a class="version-badge" href="https://github.com/ysait0/routetools-webapp" target="_blank" rel="noopener">v1.5.0</a>
     <div class="lang-select">
       <select id="language-selector" aria-label="Language">
         <option value="ja">日本語</option>
@@ -94,6 +94,14 @@
           </label>
           <input type="checkbox" id="force" />
           <span class="option-caption" data-i18n="label.force_caption">最近傍点に配置</span>
+        </div>
+        <div class="option-group">
+          <label for="reverse">
+            <span data-i18n="label.reverse">逆走</span>
+            <span class="info-icon" data-i18n-tooltip="tooltip.reverse" data-tooltip=""></span>
+          </label>
+          <input type="checkbox" id="reverse" />
+          <span class="option-caption" data-i18n="label.reverse_caption">ルート方向を反転</span>
         </div>
         <button class="btn btn-primary" id="btn-download" data-i18n="button.download">ダウンロード</button>
       </section>
