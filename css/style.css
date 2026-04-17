@@ -92,7 +92,54 @@ main {
   border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
+}
+
+/* サイドバーヘッダー（トグルボタン） */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 4px 6px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.btn-sidebar-toggle {
+  background: none;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1;
+}
+
+.btn-sidebar-toggle:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.sidebar-body {
+  flex: 1;
   overflow-y: auto;
+}
+
+.sidebar.collapsed {
+  width: auto !important;
+  min-width: 0;
+}
+
+.sidebar.collapsed .sidebar-body {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-header {
+  border-bottom: none;
+}
+
+.sidebar-resizer.collapsed {
+  display: none;
 }
 
 .sidebar section {
@@ -561,6 +608,7 @@ main {
 .leaflet-google-maps-control a:hover {
   background: #f4f4f4;
 }
+
 
 /* 標高プロファイル */
 .elevation-profile {

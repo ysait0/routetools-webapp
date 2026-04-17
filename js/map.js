@@ -280,3 +280,15 @@ function setGoogleMapsControlVisible(visible) {
     googleMapsControlAdded = false;
   }
 }
+
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const resizer = document.getElementById('sidebar-resizer');
+  const btn = document.getElementById('btn-sidebar-toggle');
+  if (!sidebar) return;
+  const collapsed = sidebar.classList.toggle('collapsed');
+  if (resizer) resizer.classList.toggle('collapsed', collapsed);
+  // ◀ (開いている=閉じる方向) / ▶ (閉じている=開く方向)
+  if (btn) btn.textContent = collapsed ? '\u25B6' : '\u25C4';
+  if (map) map.invalidateSize();
+}

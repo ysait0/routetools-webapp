@@ -47,6 +47,7 @@ const translations = {
     'button.save': '保存',
     'button.delete': '削除',
     'button.google_maps_search': 'Google Maps で周辺施設を検索',
+    'button.toggle_sidebar': 'サイドバーの表示/非表示',
 
     // Start/Goal POI名
     'poi.start_name': 'スタート',
@@ -162,6 +163,7 @@ const translations = {
     'button.save': 'Save',
     'button.delete': 'Delete',
     'button.google_maps_search': 'Search nearby on Google Maps',
+    'button.toggle_sidebar': 'Toggle sidebar',
 
     // Start/Goal POI name
     'poi.start_name': 'Start',

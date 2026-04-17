@@ -487,6 +487,9 @@ function setupEventListeners() {
   // ダウンロードボタン
   document.getElementById('btn-download').addEventListener('click', handleDownload);
 
+  // サイドバートグル
+  document.getElementById('btn-sidebar-toggle').addEventListener('click', toggleSidebar);
+
   // 逆走チェックボックス
   document.getElementById('reverse').addEventListener('change', handleReverseToggle);
 
