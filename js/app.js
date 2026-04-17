@@ -471,8 +471,7 @@ function setupEventListeners() {
   });
 
   // スタート/ゴールPOI追加ボタン
-  document.getElementById('btn-add-start').addEventListener('click', () => addEndpointPOI('start'));
-  document.getElementById('btn-add-goal').addEventListener('click', () => addEndpointPOI('goal'));
+  document.getElementById('btn-add-start-goal').addEventListener('click', addStartGoalPOIs);
 
   // 右左折自動追加 / 自動追加POI削除
   document.getElementById('btn-auto-turn').addEventListener('click', handleAutoTurn);
@@ -682,11 +681,6 @@ function removePOI(index) {
 }
 
 function addEndpointPOI(endpoint) {
-  if (!appState.trackpoints || appState.trackpoints.length === 0) {
-    showStatus(t('status.error_no_route'), true);
-    return;
-  }
-  saveHistoryPoint();
   const tp = endpoint === 'start'
     ? appState.trackpoints[0]
     : appState.trackpoints[appState.trackpoints.length - 1];
@@ -700,9 +694,19 @@ function addEndpointPOI(endpoint) {
     symbol: null,
     endpointRole: endpoint,
   });
+}
+
+function addStartGoalPOIs() {
+  if (!appState.trackpoints || appState.trackpoints.length === 0) {
+    showStatus(t('status.error_no_route'), true);
+    return;
+  }
+  saveHistoryPoint();
+  addEndpointPOI('start');
+  addEndpointPOI('goal');
   appState.lastPOIResults = null;
   updateDisplay();
-  showStatus(t('status.poi_added_manual', { name: name }));
+  showStatus(t('status.poi_added_manual', { name: t('button.add_start_goal') }));
 }
 
 // 緯度経度を一意キーに（小数7桁で十分な精度）

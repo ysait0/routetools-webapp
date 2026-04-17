@@ -90,7 +90,7 @@ function initMap(elementId) {
   baseLayers[savedName].addTo(map);
 
   // レイヤー切り替えコントロール
-  L.control.layers(baseLayers, null, { position: 'topright', collapsed: true }).addTo(map);
+  L.control.layers(baseLayers, null, { position: 'bottomright', collapsed: true }).addTo(map);
 
   // 選択をlocalStorageに保存
   map.on('baselayerchange', (e) => {
