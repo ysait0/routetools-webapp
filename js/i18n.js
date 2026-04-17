@@ -47,6 +47,7 @@ const translations = {
     'button.remove_auto': '自動追加POIを削除',
     'button.save': '保存',
     'button.delete': '削除',
+    'button.google_maps_search': 'Google Maps で周辺施設を検索',
 
     // Start/Goal POI名
     'poi.start_name': 'スタート',
@@ -111,6 +112,9 @@ const translations = {
     'poi_status.added': '追加',
     'poi_status.skipped': 'スキップ',
     'poi.no_name': '(名前なし)',
+
+    // Google Maps 検索
+    'google_maps.query': 'カフェ コンビニ',
   },
   en: {
     // Header
@@ -159,6 +163,7 @@ const translations = {
     'button.remove_auto': 'Remove Auto-added POIs',
     'button.save': 'Save',
     'button.delete': 'Delete',
+    'button.google_maps_search': 'Search nearby on Google Maps',
 
     // Start/Goal POI name
     'poi.start_name': 'Start',
@@ -223,6 +228,9 @@ const translations = {
     'poi_status.added': 'Added',
     'poi_status.skipped': 'Skipped',
     'poi.no_name': '(unnamed)',
+
+    // Google Maps search
+    'google_maps.query': 'cafe convenience store',
   },
 };
 

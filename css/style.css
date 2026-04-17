@@ -538,6 +538,30 @@ main {
   min-height: 0;
 }
 
+/* レイヤー切り替えボタンをズームボタンと同じサイズに統一 */
+.leaflet-control-layers-toggle {
+  width: 30px !important;
+  height: 30px !important;
+  background-size: 20px 20px !important;
+}
+
+/* Google Maps 検索ボタン（地図上コントロール） */
+.leaflet-google-maps-control a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  line-height: 30px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.leaflet-google-maps-control a:hover {
+  background: #f4f4f4;
+}
+
 /* 標高プロファイル */
 .elevation-profile {
   background: #f8fafc;

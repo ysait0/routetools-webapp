@@ -930,7 +930,9 @@ function sortPOIsByRouteOrder() {
 }
 
 function updateDisplay() {
-  setElevationProfileVisible(appState.trackpoints && appState.trackpoints.length > 0);
+  const hasRoute = appState.trackpoints && appState.trackpoints.length > 0;
+  setElevationProfileVisible(hasRoute);
+  setGoogleMapsControlVisible(hasRoute);
   sortPOIsByRouteOrder();
   displayRoute(appState.trackpoints);
   displayPOIs(appState.pois);
