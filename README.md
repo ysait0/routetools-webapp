@@ -13,10 +13,11 @@ This is the web counterpart of the CLI tool [routetools-cli](https://github.com/
 - Add POIs manually by clicking on the route
 - Edit POI name, description, and type (Generic / Flag / Straight / Left / Right)
 - Keep POIs sorted in current route order
-- Add Start / Goal POIs
+- Add Start / Goal POIs together
 - Auto-generate and remove turn POIs
 - Reverse the route direction with immediate updates to the map, POI list, and elevation profile
 - Show an elevation profile with cross-highlighting between the map and profile
+- Open Google Maps from a map button to search for nearby facilities (cafes, convenience stores, etc.)
 - Undo / Redo via buttons and `Ctrl/Cmd+Z`, `Ctrl+Y`, `Cmd+Shift+Z`
 - Adjust tolerance distance and toggle "Force" (snap to nearest route point)
 - Download the result as TCX or GPX
@@ -38,8 +39,9 @@ Just open the hosted page in your browser:
 2. Optionally drop another route file or a CSV onto the "Add POI" zone, or click on the route to add POIs manually
 3. Edit POI name / description / type in the list or from a marker popup
 4. Optionally add Start / Goal POIs, auto-generate turn POIs, or reverse the route direction
-5. Review the elevation profile, then pick output format (TCX / GPX) and adjust tolerance / force
-6. Click "Download"
+5. Use the 🔍 button on the map to open Google Maps and check nearby facilities such as cafes and convenience stores
+6. Review the elevation profile, then pick output format (TCX / GPX) and adjust tolerance / force
+7. Click "Download"
 
 ## CSV format for POI import
 
@@ -72,13 +74,21 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
+## Security
+
+- All files are processed locally in your browser and never sent to any server
+- CDN resources (Leaflet / JSZip) are loaded with SRI (Subresource Integrity) hashes
+- Content Security Policy (CSP) restricts scripts, images, and connections
+- iframe embedding is blocked (`frame-ancestors 'none'`)
+- Input file size limit (50 MB) and KMZ decompression size limit (100 MB)
+
 ## Tech stack
 
 - Vanilla JavaScript (no framework, no build step)
 - [Leaflet](https://leafletjs.com/) for the map
 - [JSZip](https://stuk.github.io/jszip/) for KMZ extraction
 - [fit-file-parser](https://www.npmjs.com/package/fit-file-parser) for FIT import (loaded dynamically in the browser)
-- OpenStreetMap tiles
+- OpenStreetMap / CyclOSM / GSI (Geospatial Information Authority of Japan) tiles
 
 ## Related
 
