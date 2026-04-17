@@ -104,12 +104,22 @@ function parseKML(xmlString) {
 }
 
 // --- KMZ パーサー (JSZip使用) ---
+// 展開後の最大サイズ（100MB）。Zip Bomb対策。
+const KMZ_MAX_UNCOMPRESSED_BYTES = 100 * 1024 * 1024;
+
 async function parseKMZ(arrayBuffer) {
   const zip = await JSZip.loadAsync(arrayBuffer);
   let kmlContent = null;
   for (const filename of Object.keys(zip.files)) {
     if (filename.endsWith('.kml')) {
-      kmlContent = await zip.files[filename].async('string');
+      const file = zip.files[filename];
+      if (file._data && file._data.uncompressedSize > KMZ_MAX_UNCOMPRESSED_BYTES) {
+        throw new Error(`KMLの展開後サイズが上限（${KMZ_MAX_UNCOMPRESSED_BYTES / 1024 / 1024}MB）を超えています`);
+      }
+      kmlContent = await file.async('string');
+      if (kmlContent.length > KMZ_MAX_UNCOMPRESSED_BYTES) {
+        throw new Error(`KMLの展開後サイズが上限（${KMZ_MAX_UNCOMPRESSED_BYTES / 1024 / 1024}MB）を超えています`);
+      }
       break;
     }
   }
@@ -315,11 +325,18 @@ function fitDataToRoute(data) {
   return { metadata, trackpoints, pois };
 }
 
+// 入力ファイルの最大サイズ（50MB）。巨大ファイルによるブラウザフリーズ防止。
+const MAX_INPUT_FILE_BYTES = 50 * 1024 * 1024;
+
 /**
  * ファイルを自動判定してパース
  * @returns Promise<{metadata, trackpoints, pois}>
  */
 async function parseFile(file) {
+  if (file.size > MAX_INPUT_FILE_BYTES) {
+    throw new Error(`ファイルサイズが上限（${MAX_INPUT_FILE_BYTES / 1024 / 1024}MB）を超えています`);
+  }
+
   const ext = file.name.split('.').pop().toUpperCase();
 
   if (ext === 'KMZ') {

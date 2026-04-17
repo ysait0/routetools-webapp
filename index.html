@@ -18,15 +18,16 @@
   <meta name="twitter:title" content="routetools">
   <meta name="twitter:description" content="Browser-based route editor for GPX / KML / KMZ / TCX.">
 
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com https://esm.sh; style-src 'self' https://unpkg.com 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.tile-cyclosm.openstreetmap.fr https://cyberjapandata.gsi.go.jp; connect-src 'self' https://esm.sh; frame-ancestors 'none';">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <header>
     <h1 id="app-title" data-i18n="header.title" title="クリックでリロード">routetools</h1>
     <span id="status" class="status" data-i18n="header.initial_status">ルートファイルを読み込んでください</span>
-    <a class="version-badge" href="https://github.com/ysait0/routetools-webapp" target="_blank" rel="noopener">v1.8.1</a>
+    <a class="version-badge" href="https://github.com/ysait0/routetools-webapp" target="_blank" rel="noopener">v1.9.0</a>
     <div class="lang-select">
       <select id="language-selector" aria-label="Language">
         <option value="ja">日本語</option>
@@ -164,8 +165,8 @@
     </div>
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
   <!-- fit-file-parser は parsers.js 内で動的 import (esm.sh) して利用 -->
   <script src="js/i18n.js"></script>
   <script src="js/geo.js"></script>

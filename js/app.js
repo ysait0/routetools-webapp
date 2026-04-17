@@ -1006,6 +1006,12 @@ function updatePOIList() {
 
   tbody.querySelectorAll('.editable').forEach(cell => {
     cell.addEventListener('blur', handleCellEdit);
+    // HTMLペーストをプレーンテキストに強制（contenteditable内でのHTML描画を防止）
+    cell.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+      document.execCommand('insertText', false, text);
+    });
     cell.addEventListener('keydown', (e) => {
       // IME変換中のEnterは確定用なので無視
       if (e.isComposing || e.keyCode === 229) return;
