@@ -77,18 +77,38 @@ python3 -m http.server 8000
 ## Security
 
 - All files are processed locally in your browser and never sent to any server
-- CDN resources (Leaflet / JSZip) are loaded with SRI (Subresource Integrity) hashes
+- Google Maps is loaded from Google Maps Platform and requires a referrer-restricted Maps JavaScript API key
+- CDN resources (JSZip) are loaded with SRI (Subresource Integrity) hashes
 - Content Security Policy (CSP) restricts scripts, images, and connections
 - iframe embedding is blocked (`frame-ancestors 'none'`)
 - Input file size limit (50 MB) and KMZ decompression size limit (100 MB)
 
+## Google Maps API key
+
+This branch uses Google Maps JavaScript API for the map and Places API (New) for nearby place search. Configure an API key before running the app:
+
+1. Enable Maps JavaScript API in Google Cloud
+2. Enable Places API (New)
+3. Create an API key with HTTP referrer restrictions
+4. Restrict the key to Maps JavaScript API and Places API (New)
+5. Set the key in `js/config.js`
+
+```js
+window.ROUTETOOLS_CONFIG = {
+  googleMapsApiKey: 'YOUR_BROWSER_RESTRICTED_API_KEY',
+};
+```
+
+For local testing, you can also pass `?google_maps_api_key=YOUR_KEY` in the URL or set `localStorage["routetools-google-maps-api-key"]`.
+
+Nearby place search accepts a free-text query and searches within the currently visible route range on the map.
+
 ## Tech stack
 
 - Vanilla JavaScript (no framework, no build step)
-- [Leaflet](https://leafletjs.com/) for the map
+- [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript) for the map
 - [JSZip](https://stuk.github.io/jszip/) for KMZ extraction
 - [fit-file-parser](https://www.npmjs.com/package/fit-file-parser) for FIT import (loaded dynamically in the browser)
-- OpenStreetMap / CyclOSM / GSI (Geospatial Information Authority of Japan) tiles
 
 ## Related
 

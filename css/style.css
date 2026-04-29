@@ -585,28 +585,96 @@ main {
   min-height: 0;
 }
 
-/* レイヤー切り替えボタンをズームボタンと同じサイズに統一 */
-.leaflet-control-layers-toggle {
-  width: 30px !important;
-  height: 30px !important;
-  background-size: 20px 20px !important;
+/* Google Maps 検索ボタン（地図上コントロール） */
+.google-maps-search-control {
+  margin: 10px;
 }
 
-/* Google Maps 検索ボタン（地図上コントロール） */
-.leaflet-google-maps-control a {
+.nearby-search-panel {
+  width: 240px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.nearby-search-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.nearby-search-fields label {
+  display: grid;
+  gap: 4px;
+}
+
+.nearby-search-fields span {
+  font-size: 11px;
+  color: #475569;
+}
+
+.nearby-search-fields select,
+.nearby-search-fields input[type="text"] {
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+  color: #1f2937;
+}
+
+.nearby-search-fields input[type="text"]:focus,
+.nearby-search-fields select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.nearby-search-actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  font-size: 16px;
-  line-height: 30px;
-  text-decoration: none;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.nearby-search-actions button {
+  flex: 1;
+  height: 32px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  color: #1f2937;
+  font-size: 12px;
   cursor: pointer;
 }
 
-.leaflet-google-maps-control a:hover {
-  background: #f4f4f4;
+.nearby-search-actions button:hover {
+  background: #f8fafc;
+}
+
+.nearby-search-actions .nearby-search-run {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.nearby-search-actions .nearby-search-run:hover {
+  background: #1d4ed8;
+}
+
+#map.map-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  text-align: center;
+}
+
+#map.map-message.error {
+  color: #b91c1c;
 }
 
 
@@ -690,11 +758,6 @@ main {
   pointer-events: none;
 }
 
-/* ルートのカーソル */
-.leaflet-interactive {
-  cursor: pointer;
-}
-
 /* POIマーカー (divIconのデフォルト余白を除去) */
 .poi-marker-icon {
   background: none;
@@ -738,6 +801,129 @@ main {
 }
 
 .poi-add-popup .popup-actions .btn {
+  width: auto;
+  flex: 1;
+  padding: 5px 10px;
+  font-size: 12px;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.nearby-place-popup h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.nearby-place-address {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.nearby-place-website {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.nearby-place-website a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.nearby-place-website a:hover {
+  text-decoration: underline;
+}
+
+.nearby-place-hours {
+  margin: 0 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: #f8fafc;
+}
+
+.nearby-place-hours summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.nearby-place-hours summary::-webkit-details-marker {
+  display: none;
+}
+
+.nearby-place-hours-heading {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.nearby-place-hours-summary-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nearby-place-hours-today {
+  font-size: 12px;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.nearby-place-hours summary::after {
+  content: '▾';
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.nearby-place-hours[open] summary::after {
+  content: '▴';
+}
+
+.nearby-place-hours-list {
+  margin: 0;
+  padding: 0 10px 10px;
+  list-style: none;
+}
+
+.nearby-place-hours-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 6px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.nearby-place-hours-list li.today {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.nearby-place-hours-day {
+  white-space: nowrap;
+}
+
+.nearby-place-hours-value {
+  text-align: right;
+}
+
+.nearby-place-popup .popup-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.nearby-place-popup .popup-actions .btn {
   width: auto;
   flex: 1;
   padding: 5px 10px;

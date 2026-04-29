@@ -18,9 +18,9 @@
   <meta name="twitter:title" content="routetools">
   <meta name="twitter:description" content="Browser-based route editor for GPX / KML / KMZ / TCX.">
 
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com https://esm.sh; style-src 'self' https://unpkg.com 'unsafe-inline'; img-src 'self' data: blob: https://unpkg.com https://*.tile.openstreetmap.org https://*.tile-cyclosm.openstreetmap.fr https://cyberjapandata.gsi.go.jp; connect-src 'self' https://esm.sh; frame-ancestors 'none';">
+  <meta name="google-maps-api-key" content="">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com https://esm.sh https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' https://unpkg.com https://fonts.googleapis.com 'unsafe-inline'; img-src 'self' data: blob: https://unpkg.com https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; connect-src 'self' https://esm.sh https://*.googleapis.com https://*.gstatic.com https://*.google.com; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none';">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -169,9 +169,9 @@
     </div>
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
   <!-- fit-file-parser は parsers.js 内で動的 import (esm.sh) して利用 -->
+  <script src="js/config.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/geo.js"></script>
   <script src="js/parsers.js"></script>
