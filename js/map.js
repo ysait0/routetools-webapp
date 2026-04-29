@@ -68,6 +68,15 @@ function loadGoogleMapsApi() {
     return Promise.reject(new Error(t('status.google_maps_key_missing')));
   }
 
+  // Google Maps の認証/利用上限失敗時に呼ばれるグローバルコールバック。
+  // 理由コードは渡されないため、原因は DevTools のコンソールで確認する必要がある。
+  window.gm_authFailure = () => {
+    console.error('[Google Maps] gm_authFailure: APIキー無効・課金未設定・利用上限超過などの認証失敗が発生しました');
+    if (typeof showStatus === 'function') {
+      showStatus(t('status.google_maps_auth_failed'), true);
+    }
+  };
+
   googleMapsLoadPromise = new Promise((resolve, reject) => {
     window[GOOGLE_MAPS_CALLBACK] = () => {
       resolve(window.google.maps);
@@ -655,12 +664,42 @@ function getNearbyResultIcon() {
   };
 }
 
+// 周辺検索系エラーを i18n キーに分類する。生メッセージは表示せず console.error に残す。
+function classifyNearbySearchError(err) {
+  if (err && err.__routetoolsErrorType === 'places_library_load_failed') {
+    return 'status.places_library_load_failed';
+  }
+
+  const message = (err && err.message) ? String(err.message) : String(err || '');
+  const code = (err && err.code !== undefined) ? String(err.code) : '';
+  const status = (err && err.status !== undefined) ? String(err.status) : '';
+  const haystack = `${message} ${code} ${status}`.toUpperCase();
+
+  if (/OVER_QUERY_LIMIT|RESOURCE_EXHAUSTED|QUOTA|\b429\b/.test(haystack)) {
+    return 'status.nearby_quota_exceeded';
+  }
+  if (/PERMISSION_DENIED|REQUEST_DENIED|UNAUTHENTICATED|\b401\b|\b403\b/.test(haystack)) {
+    return 'status.nearby_permission_denied';
+  }
+  if (/INVALID_ARGUMENT|INVALID_REQUEST|\b400\b/.test(haystack)) {
+    return 'status.nearby_invalid_request';
+  }
+  if (err instanceof TypeError || /NETWORK|FETCH|ERR_NETWORK|ERR_INTERNET/.test(haystack)) {
+    return 'status.nearby_network_error';
+  }
+  return 'status.nearby_unknown_error';
+}
+
 async function loadPlacesLibrary() {
   if (!map) throw new Error(t('status.google_maps_load_failed'));
   if (placesLibraryPromise) return placesLibraryPromise;
   placesLibraryPromise = google.maps.importLibrary('places')
     .catch(err => {
       placesLibraryPromise = null;
+      // 後段の分類処理で識別できるようマーカーを付与する
+      if (err && typeof err === 'object') {
+        err.__routetoolsErrorType = 'places_library_load_failed';
+      }
       throw err;
     });
   return placesLibraryPromise;
@@ -735,8 +774,10 @@ async function searchNearbyPlaces(query) {
     const { places } = await Place.searchByText(request);
     renderNearbyPlaceResults(places || [], trimmedQuery);
   } catch (err) {
-    const message = (err && err.message) ? err.message : String(err);
-    showStatus(t('status.nearby_error', { message }), true);
+    // 生エラーはユーザーには出さず、デバッグ用に DevTools のコンソールへ残す
+    console.error('[Nearby search] error:', err);
+    const key = classifyNearbySearchError(err);
+    showStatus(t(key), true);
   } finally {
     if (runButton) runButton.disabled = false;
   }
