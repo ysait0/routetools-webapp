@@ -77,18 +77,38 @@ python3 -m http.server 8000
 ## セキュリティ
 
 - ファイルはすべてブラウザ内で処理され、外部サーバーには送信されません
-- CDNリソース（Leaflet / JSZip）には SRI（Subresource Integrity）ハッシュを付与
+- 地図表示には Google Maps Platform を利用し、HTTP referrer 制限を設定した Maps JavaScript API キーが必要です
+- CDNリソース（JSZip）には SRI（Subresource Integrity）ハッシュを付与
 - Content Security Policy（CSP）でスクリプト・画像・接続先を制限
 - iframe 埋め込みを禁止（`frame-ancestors 'none'`）
 - 入力ファイルサイズ制限（50MB）および KMZ 展開サイズ制限（100MB）
 
+## Google Maps APIキー
+
+このブランチでは地図表示に Google Maps JavaScript API を、周辺施設検索に Places API (New) を利用します。アプリを動かす前に APIキーを設定してください。
+
+1. Google Cloud で Maps JavaScript API を有効化
+2. Google Cloud で Places API (New) を有効化
+3. HTTP referrer 制限付きの APIキーを作成
+4. APIキーを Maps JavaScript API と Places API (New) のみに制限
+5. `js/config.js` に APIキーを設定
+
+```js
+window.ROUTETOOLS_CONFIG = {
+  googleMapsApiKey: 'YOUR_BROWSER_RESTRICTED_API_KEY',
+};
+```
+
+ローカル確認では URL に `?google_maps_api_key=YOUR_KEY` を付ける方法、または `localStorage["routetools-google-maps-api-key"]` に設定する方法も使えます。
+
+周辺施設検索は自由入力で行い、現在表示中のルート範囲を対象に検索します。
+
 ## 技術スタック
 
 - Vanilla JavaScript（フレームワーク・ビルドステップなし）
-- [Leaflet](https://leafletjs.com/) （地図表示）
+- [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript) （地図表示）
 - [JSZip](https://stuk.github.io/jszip/) （KMZ展開）
 - [fit-file-parser](https://www.npmjs.com/package/fit-file-parser) （FIT読込。ブラウザでは動的importで利用）
-- OpenStreetMap / CyclOSM / 国土地理院タイル
 
 ## 関連リポジトリ
 

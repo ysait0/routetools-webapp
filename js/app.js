@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setMarkerClickHandler(handlePOIMarkerClick);
   setMarkerHoverHandler(handlePOIMarkerHover);
   setRouteHoverHandler(handleRouteHover);
+  setNearbyPlaceAddHandler(handleNearbyPlaceAdd);
   setProfileHoverHandler(handleProfileHover);
   setProfileClickHandler(handleProfileClick);
   setupSidebarResizer();
@@ -181,10 +182,7 @@ function handleRouteClick(latlng) {
     </div>
   `;
 
-  const popup = L.popup({ closeButton: true, minWidth: 220 })
-    .setLatLng(latlng)
-    .setContent(content)
-    .openOn(getMap());
+  openMapPopup(latlng, content);
 
   // DOM挿入後にハンドラをバインド
   setTimeout(() => {
@@ -205,12 +203,12 @@ function handleRouteClick(latlng) {
         symbol: null,
       });
       appState.lastPOIResults = null;
-      getMap().closePopup(popup);
+      closeMapPopup();
       updateDisplay();
       showStatus(t('status.poi_added_manual', { name: name || t('poi.no_name') }));
     };
 
-    const cancel = () => getMap().closePopup(popup);
+    const cancel = () => closeMapPopup();
 
     document.getElementById('btn-confirm-poi').addEventListener('click', confirm);
     document.getElementById('btn-cancel-poi').addEventListener('click', cancel);
@@ -297,10 +295,7 @@ function handlePOIMarkerClick(index) {
     </div>
   `;
 
-  const popup = L.popup({ closeButton: true, minWidth: 240 })
-    .setLatLng([poi.latitude, poi.longitude])
-    .setContent(content)
-    .openOn(getMap());
+  openMapPopup({ lat: poi.latitude, lng: poi.longitude }, content);
 
   setTimeout(() => {
     const nameInput = document.getElementById('edit-poi-name');
@@ -318,7 +313,7 @@ function handlePOIMarkerClick(index) {
       const nextName = name || null;
       const nextNotes = notes || null;
       if (currentPoi.name === nextName && currentPoi.notes === nextNotes && currentPoi.type === type) {
-        getMap().closePopup(popup);
+        closeMapPopup();
         return;
       }
       saveHistoryPoint();
@@ -326,15 +321,15 @@ function handlePOIMarkerClick(index) {
       appState.pois[index].notes = notes || null;
       appState.pois[index].type = type;
       appState.lastPOIResults = null;
-      getMap().closePopup(popup);
+      closeMapPopup();
       updateDisplay();
       showStatus(t('status.poi_updated', { name: name || t('poi.no_name') }));
     };
 
-    const cancel = () => getMap().closePopup(popup);
+    const cancel = () => closeMapPopup();
 
     const del = () => {
-      getMap().closePopup(popup);
+      closeMapPopup();
       removePOI(index);
     };
 
@@ -354,8 +349,56 @@ function handlePOIMarkerClick(index) {
   }, 0);
 }
 
+function normalizeNearbyPlaceDisplayName(place) {
+  if (!place) return t('poi.no_name');
+  if (typeof place.displayName === 'string') return place.displayName;
+  if (place.displayName && typeof place.displayName.text === 'string') return place.displayName.text;
+  return t('poi.no_name');
+}
+
+function normalizeNearbyPlaceLocation(place) {
+  if (!place || !place.location) return null;
+  if (typeof place.location.lat === 'function' && typeof place.location.lng === 'function') {
+    return {
+      latitude: place.location.lat(),
+      longitude: place.location.lng(),
+    };
+  }
+  return {
+    latitude: Number(place.location.lat),
+    longitude: Number(place.location.lng),
+  };
+}
+
+function handleNearbyPlaceAdd(place) {
+  const location = normalizeNearbyPlaceLocation(place);
+  if (!location) {
+    showStatus(t('status.nearby_location_missing'), true);
+    return;
+  }
+
+  const name = normalizeNearbyPlaceDisplayName(place);
+  const notes = place.formattedAddress || null;
+
+  saveHistoryPoint();
+  appState.pois.push({
+    latitude: location.latitude,
+    longitude: location.longitude,
+    name: name === t('poi.no_name') ? null : name,
+    notes: notes,
+    type: 'Generic',
+    symbol: null,
+  });
+  appState.lastPOIResults = null;
+  updateDisplay();
+  showStatus(t('status.nearby_added', { name }));
+}
+
 // i18nから呼ばれる再描画ハンドラ
 function onLanguageChanged() {
+  if (typeof refreshGoogleMapsSearchControlTranslations === 'function') {
+    refreshGoogleMapsSearchControlTranslations();
+  }
   updateDisplay();
 }
 
@@ -393,7 +436,7 @@ function setupSidebarResizer() {
     const newWidth = e.clientX - rect.left;
     const clamped = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
     sidebar.style.width = clamped + 'px';
-    // 地図サイズが変わったのでLeafletに再計算を促す
+    // 地図サイズが変わったので再描画を促す
     const m = getMap();
     if (m) m.invalidateSize();
   });

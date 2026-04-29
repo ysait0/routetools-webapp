@@ -13,7 +13,7 @@ const translations = {
 
     // イントロ（サイドバー上部の説明）
     'intro.features': 'ルートファイル（GPX / KML / KMZ / TCX / FIT）の<strong>形式変換</strong>と<strong>POIの追加・編集</strong>ができます。',
-    'intro.privacy': '※ ファイルはブラウザ内で処理され、サーバーには送信されません。',
+    'intro.privacy': '※ ファイルはブラウザ内で処理され、サーバーには送信されません。地図表示には Google Maps を利用します。',
     'intro.read_more': '詳しくはこちら',
 
     // ヒント
@@ -29,6 +29,11 @@ const translations = {
     'label.reverse': '逆走',
     'label.reverse_caption': 'ルート方向を反転',
     'label.language': '言語',
+    'label.nearby_type': 'カテゴリ',
+    'label.nearby_radius': '半径',
+    'label.nearby_query': '検索語',
+    'label.opening_hours': '営業時間',
+    'label.today': '今日',
 
     // ドロップゾーン
     'dropzone.default': 'ドラッグ&ドロップ / クリックで選択',
@@ -47,6 +52,11 @@ const translations = {
     'button.save': '保存',
     'button.delete': '削除',
     'button.google_maps_search': 'Google Maps で周辺施設を検索',
+    'button.nearby_search': '周辺施設を検索',
+    'button.search': '検索',
+    'button.clear_results': '結果クリア',
+    'button.open_google_maps': 'Google Maps',
+    'button.add_as_poi': 'POI追加',
     'button.toggle_sidebar': 'サイドバーの表示/非表示',
 
     // Start/Goal POI名
@@ -63,6 +73,7 @@ const translations = {
     'placeholder.poi_name': '名前を入力',
     'placeholder.poi_notes': '説明を入力（任意）',
     'placeholder.poi_type': 'タイプ（任意）',
+    'placeholder.nearby_query': '例: コンビニ, カフェ, トイレ',
 
     // テーブル
     'table.num': '#',
@@ -87,6 +98,18 @@ const translations = {
 
     // ステータスメッセージ
     'status.loading': 'ファイルを読み込み中...',
+    'status.google_maps_loading': 'Google Maps を読み込み中...',
+    'status.google_maps_key_missing': 'エラー: Google Maps APIキーが設定されていません',
+    'status.google_maps_load_failed': 'エラー: Google Maps の読み込みに失敗しました',
+    'status.nearby_searching': '「{query}」を検索中...',
+    'status.nearby_results': '「{query}」を{count}件表示しました',
+    'status.nearby_none': '「{query}」は見つかりませんでした',
+    'status.nearby_error': '周辺検索エラー: {message}',
+    'status.nearby_results_cleared': '検索結果をクリアしました',
+    'status.nearby_added': '周辺施設をPOIに追加しました: {name}',
+    'status.nearby_location_missing': '検索結果の位置情報を取得できませんでした',
+    'status.nearby_query_required': '検索語を入力してください',
+    'status.nearby_bounds_missing': '現在表示中のルート範囲を取得できませんでした',
     'status.poi_loading': 'POIファイルを読み込み中...',
     'status.reset': 'リセットしました',
     'status.undo': '元に戻しました',
@@ -115,6 +138,18 @@ const translations = {
 
     // Google Maps 検索
     'google_maps.query': 'カフェ コンビニ',
+    'nearby.default_query': 'コンビニ',
+    'nearby.type.convenience_store': 'コンビニ',
+    'nearby.type.cafe': 'カフェ',
+    'nearby.type.restaurant': 'レストラン',
+    'nearby.type.bicycle_store': '自転車店',
+    'nearby.type.public_bathroom': 'トイレ',
+    'nearby.type.supermarket': 'スーパー',
+    'nearby.type.pharmacy': '薬局',
+    'nearby.type.gas_station': 'ガソリンスタンド',
+    'nearby.type.park': '公園',
+    'hours.closed': '休業',
+    'hours.open_24': '24時間営業',
   },
   en: {
     // Header
@@ -129,7 +164,7 @@ const translations = {
 
     // Intro (top of sidebar)
     'intro.features': '<strong>Convert</strong> route file formats (GPX / KML / KMZ / TCX / FIT) and <strong>add / edit POIs</strong>.',
-    'intro.privacy': '※ Files are processed locally in your browser and never sent to any server.',
+    'intro.privacy': '※ Files are processed locally in your browser and never sent to any server. Maps are displayed with Google Maps.',
     'intro.read_more': 'Read more',
 
     // Hints
@@ -145,6 +180,11 @@ const translations = {
     'label.reverse': 'Reverse',
     'label.reverse_caption': 'Reverse route direction',
     'label.language': 'Language',
+    'label.nearby_type': 'Category',
+    'label.nearby_radius': 'Radius',
+    'label.nearby_query': 'Query',
+    'label.opening_hours': 'Hours',
+    'label.today': 'Today',
 
     // Drop zone
     'dropzone.default': 'Drag & Drop / Click to select',
@@ -163,6 +203,11 @@ const translations = {
     'button.save': 'Save',
     'button.delete': 'Delete',
     'button.google_maps_search': 'Search nearby on Google Maps',
+    'button.nearby_search': 'Nearby search',
+    'button.search': 'Search',
+    'button.clear_results': 'Clear',
+    'button.open_google_maps': 'Google Maps',
+    'button.add_as_poi': 'Add as POI',
     'button.toggle_sidebar': 'Toggle sidebar',
 
     // Start/Goal POI name
@@ -179,6 +224,7 @@ const translations = {
     'placeholder.poi_name': 'Enter name',
     'placeholder.poi_notes': 'Enter description (optional)',
     'placeholder.poi_type': 'Type (optional)',
+    'placeholder.nearby_query': 'e.g. convenience store, cafe, restroom',
 
     // Table
     'table.num': '#',
@@ -203,6 +249,18 @@ const translations = {
 
     // Status messages
     'status.loading': 'Loading file...',
+    'status.google_maps_loading': 'Loading Google Maps...',
+    'status.google_maps_key_missing': 'Error: Google Maps API key is not configured',
+    'status.google_maps_load_failed': 'Error: Failed to load Google Maps',
+    'status.nearby_searching': 'Searching for "{query}"...',
+    'status.nearby_results': '{count} results shown for "{query}"',
+    'status.nearby_none': 'No results found for "{query}"',
+    'status.nearby_error': 'Nearby search error: {message}',
+    'status.nearby_results_cleared': 'Nearby results cleared',
+    'status.nearby_added': 'Nearby place added as POI: {name}',
+    'status.nearby_location_missing': 'Nearby result has no location data',
+    'status.nearby_query_required': 'Enter a search query',
+    'status.nearby_bounds_missing': 'Could not determine the visible route range',
     'status.poi_loading': 'Loading POI file...',
     'status.reset': 'Reset complete',
     'status.undo': 'Undone',
@@ -231,6 +289,18 @@ const translations = {
 
     // Google Maps search
     'google_maps.query': 'cafe convenience store',
+    'nearby.default_query': 'convenience store',
+    'nearby.type.convenience_store': 'Convenience store',
+    'nearby.type.cafe': 'Cafe',
+    'nearby.type.restaurant': 'Restaurant',
+    'nearby.type.bicycle_store': 'Bicycle shop',
+    'nearby.type.public_bathroom': 'Restroom',
+    'nearby.type.supermarket': 'Supermarket',
+    'nearby.type.pharmacy': 'Pharmacy',
+    'nearby.type.gas_station': 'Gas station',
+    'nearby.type.park': 'Park',
+    'hours.closed': 'Closed',
+    'hours.open_24': 'Open 24 hours',
   },
 };
 
